@@ -1,10 +1,11 @@
 import {defs, tiny} from './examples/common.js';
+import { Shape_From_File } from './examples/obj-file-demo.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Axis_Arrows, Textured_Phong} = defs
+const {Cube, Axis_Arrows, Textured_Phong, Subdivision_Sphere} = defs
 
 export class Assignment4 extends Scene {
     /**
@@ -21,16 +22,18 @@ export class Assignment4 extends Scene {
         this.shapes = {
             box_1: new Cube(),
             box_2: new Cube(),
-            axis: new Axis_Arrows()
+            sphere: new Subdivision_Sphere(4), 
+            axis: new Axis_Arrows(),
+            teapot: new Shape_From_File("assets/teapot.obj"),
         }
-        this.box_1_angle = 0
-        this.box_2_angle = 0
-        this.rotate = 1
+        // this.box_1_angle = 0
+        // this.box_2_angle = 0
+        // this.rotate = 1
 
-        console.log(this.shapes.box_2.arrays.texture_coord)
+        console.log(this.shapes.sphere.arrays.texture_coord)
 
-        for (let i = 0; i < 24; i++){
-            this.shapes.box_2.arrays.texture_coord[i] = this.shapes.box_2.arrays.texture_coord[i].times(2); 
+        for (let i = 0; i < 1091; i++){
+            this.shapes.sphere.arrays.texture_coord[i] = this.shapes.sphere.arrays.texture_coord[i].times(2); 
         }
 
 
@@ -41,10 +44,10 @@ export class Assignment4 extends Scene {
             phong: new Material(new Textured_Phong(), {
                 color: hex_color("#ffffff"),
             }),
-            texture1: new Material(new Texture_Rotate(), {
-                color: hex_color("#000000"),
+            texture1: new Material(new Textured_Phong(), {
+                color: color(1,0,0,1),
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
-                texture: new Texture("assets/stars.png", "NEAREST")
+                texture: new Texture("assets/trojan.jpeg", "NEAREST")
             }),
             texture2: new Material(new Texture_Scroll_X(), {
                 color: hex_color("#000000"),
@@ -59,10 +62,13 @@ export class Assignment4 extends Scene {
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
         
-        this.key_triggered_button("Start / stop rotation", ["c"], () => {
-            this.rotate ^= 1; 
-        });
+        // this.key_triggered_button("Start / stop rotation", ["c"], () => {
+        //     this.rotate ^= 1; 
+        // });
+       
     }
+
+    
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
@@ -70,6 +76,7 @@ export class Assignment4 extends Scene {
             // Define the global camera and projection matrices, which are stored in program_state.
             program_state.set_camera(Mat4.translation(0, 0, -8));
         }
+
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
@@ -79,19 +86,21 @@ export class Assignment4 extends Scene {
 
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
+        
+        
 
         // TODO:  Draw the required boxes. Also update their stored matrices.
         
-        if (this.rotate){
-            this.box_1_angle += 2 * Math.PI / 3 * dt 
-            this.box_2_angle += 2 * Math.PI / 2 * dt
-        }
-        let cube_1_transform = model_transform.times(Mat4.translation(-2,0,0)).times(Mat4.rotation(this.box_1_angle, 1, 0, 0))//.times(Mat4.scale(2,2,2)); 
-        let cube_2_transform = model_transform.times(Mat4.translation(2,0,0)).times(Mat4.rotation(this.box_2_angle, 0,1,0))//.times(Mat4.scale(2,2,2)); 
+        // if (this.rotate){
+        //     this.box_1_angle += 2 * Math.PI / 3 * dt 
+        //     this.box_2_angle += 2 * Math.PI / 2 * dt
+        // }
+        // let cube_1_transform = model_transform.times(Mat4.translation(-2,0,0)).times(Mat4.rotation(this.box_1_angle, 1, 0, 0))//.times(Mat4.scale(2,2,2)); 
+        // let cube_2_transform = model_transform.times(Mat4.translation(2,0,0)).times(Mat4.rotation(this.box_2_angle, 0,1,0))//.times(Mat4.scale(2,2,2)); 
 
-        this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-
-        this.shapes.box_2.draw(context, program_state, cube_2_transform, this.materials.texture2); 
+        // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
+        let bomb_transform = model_transform.times(Mat4.translation(-2,0,0)).times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.scale(0.5,0.5,0.5))
+        this.shapes.sphere.draw(context, program_state, bomb_transform, this.materials.texture1); 
     }
 }
 
