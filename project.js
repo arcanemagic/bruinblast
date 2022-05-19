@@ -30,7 +30,7 @@ export class Assignment4 extends Scene {
         // this.box_2_angle = 0
         // this.rotate = 1
 
-        console.log(this.shapes.sphere.arrays.texture_coord)
+        //console.log(this.shapes.sphere.arrays.texture_coord)
 
         for (let i = 0; i < 1091; i++){
             this.shapes.sphere.arrays.texture_coord[i] = this.shapes.sphere.arrays.texture_coord[i].times(2); 
@@ -56,7 +56,16 @@ export class Assignment4 extends Scene {
             }),
         }
 
+        //this.context_store = undefined 
+        //TODO: SOPHIA
+        // canvas.addEventListener('click', (e) => {
+        //     const rect = canvas.getBoundingClientRect();
+        //     mouseX = e.clientX - rect.left;
+        //     mouseY = e.clientY - rect.top;
+        //  });
+
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.object_matrices = [] //array to hold all object matrices 
     }
 
     make_control_panel() {
@@ -67,8 +76,28 @@ export class Assignment4 extends Scene {
         // });
        
     }
-
     
+    handle_click(event, rect){
+        console.log("mouse clicked")
+        let x = event.clientX - rect.left
+        let y = event.clientY - rect.top 
+        let width = rect.right - rect.left 
+        let height = rect.bottom - rect.top 
+
+        x = (2.0 * x) / width - 1.0;
+        y = 1.0 - (2.0 * y) / height;
+        let z = -1.0
+        let ray_clip = vec4(x, y, z, 1.0);
+        console.log(x)
+        console.log(y)
+
+       
+        //console.log(event.clientX - rect.left)
+       //console.log(event.clientY - rect.top)
+         
+    }
+
+     
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
@@ -77,6 +106,7 @@ export class Assignment4 extends Scene {
             program_state.set_camera(Mat4.translation(0, 0, -8));
         }
 
+        
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);

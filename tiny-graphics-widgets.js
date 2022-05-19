@@ -70,6 +70,9 @@ const Canvas_Widget = widgets.Canvas_Widget =
 
             const primary_scene = initial_scenes ? initial_scenes[0] : undefined;
             const additional_scenes = initial_scenes ? initial_scenes.slice(1) : [];
+
+            canvas.addEventListener("click", (event) => primary_scene.handle_click(event, canvas.getBoundingClientRect()))
+
             const primary_scene_definiton = primary_scene ? primary_scene.constructor : undefined;
             if (this.show_explanation)
                 this.embedded_explanation = new Text_Widget(this.embedded_explanation_area, this.webgl_manager.scenes, this.webgl_manager);
