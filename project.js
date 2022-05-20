@@ -1,11 +1,12 @@
 import {defs, tiny} from './examples/common.js';
 import { Shape_From_File } from './examples/obj-file-demo.js';
+import { Text_Line } from './examples/text-demo.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Axis_Arrows, Textured_Phong, Subdivision_Sphere} = defs
+const {Cube, Textured_Phong, Subdivision_Sphere} = defs
 
 export class Class_Project extends Scene {
     /**
@@ -20,7 +21,7 @@ export class Class_Project extends Scene {
         //        texture coordinates as required for cube #2.  You can either do this by modifying the cube code or by modifying
         //        a cube instance's texture_coords after it is already created.
         this.shapes = {
-            box_1: new Cube(),
+            cube: new Cube(),
             sphere: new Subdivision_Sphere(4), 
             teapot: new Shape_From_File("assets/teapot.obj"),
         }
@@ -28,16 +29,16 @@ export class Class_Project extends Scene {
         // this.box_2_angle = 0
         // this.rotate = 1
 
-        //console.log(this.shapes.sphere.arrays.texture_coord)
+        //console.log(this.shapes.cube.arrays.texture_coord)
 
+        for (let i = 0; i < 24; i++){
+            this.shapes.cube.arrays.texture_coord[i] = this.shapes.cube.arrays.texture_coord[i].times(4)
+        }
         for (let i = 0; i < 1091; i++){
             this.shapes.sphere.arrays.texture_coord[i] = this.shapes.sphere.arrays.texture_coord[i].times(2); 
         }
 
 
-        // TODO:  Create the materials required to texture both cubes with the correct images and settings.
-        //        Make each Material from the correct shader.  Phong_Shader will work initially, but when
-        //        you get to requirements 6 and 7 you will need different ones.
         this.materials = {
             phong: new Material(new Textured_Phong(), {
                 color: hex_color("#ffffff"),
@@ -47,10 +48,10 @@ export class Class_Project extends Scene {
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
                 texture: new Texture("assets/trojan.jpeg", "NEAREST")
             }),
-            texture2: new Material(new Texture_Scroll_X(), {
+            sky_texture: new Material(new Texture_Scroll_X(), {
                 color: hex_color("#000000"),
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
-                texture: new Texture("assets/earth.gif", "LINEAR_MIPMAP_LINEAR")
+                texture: new Texture("assets/sky.png", "LINEAR_MIPMAP_LINEAR")
             }),
         }
 
@@ -61,7 +62,7 @@ export class Class_Project extends Scene {
         this.temp = 0;
         
         this.mouse_ray = undefined; 
-        this.objects = {};
+        this.objects = [];
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         
@@ -153,11 +154,14 @@ export class Class_Project extends Scene {
             this.initialized = true; 
         }
         
+        //draw sky 
+        let sky_model_transform = model_transform.times(Mat4.translation(0,0,-30)).times(Mat4.scale(100,100,0.1))
+        this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
 
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
         let spawns = [vec3(-4,-2,0), vec3(4,-2,0)];
-        
+    
         let bomb_transform = model_transform.times(Mat4.translation(-4,-2,0)).times(Mat4.scale(0.5,0.5,0.5));
         if (this.rotate){
             let t2 = t - this.temp;
@@ -185,7 +189,7 @@ class Texture_Scroll_X extends Textured_Phong {
                
                 float x = f_tex_coord.x; 
                 float y = f_tex_coord.y; 
-                float x_coord = x - mod(2.0 * animation_time, 10.0); 
+                float x_coord = x - mod(0.1 * animation_time, 10.0); 
                 
                 vec2 scrolled_tex_coord = vec2(x_coord, y); 
                 vec4 tex_color = texture2D( texture, scrolled_tex_coord);
@@ -193,11 +197,11 @@ class Texture_Scroll_X extends Textured_Phong {
                                                                          // Compute an initial (ambient) color:
 
                // is it inside black portion? 
-                x = mod(x_coord, 1.0); 
-                y = mod(y, 1.0); 
-                if (x >= .15 && x <= .85 && y >= .15 && y <= .85 && !(x >= .25 && x <= .75 && y >= .25 && y <= .75)){
-                    tex_color.xyz *= 0.0; 
-                }
+                // x = mod(x_coord, 1.0); 
+                // y = mod(y, 1.0); 
+                // if (x >= .15 && x <= .85 && y >= .15 && y <= .85 && !(x >= .25 && x <= .75 && y >= .25 && y <= .75)){
+                //     tex_color.xyz *= 0.0; 
+                // }
                
                 gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                 
