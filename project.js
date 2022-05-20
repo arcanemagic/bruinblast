@@ -49,6 +49,10 @@ export class Class_Project extends Scene {
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
                 texture: new Texture("assets/trojan.jpeg", "NEAREST")
             }),
+            texture2: new Material(new Textured_Phong(), {
+                color: color(1,0,0,1),
+                ambient: 1, diffusivity: 0.1, specularity: 0.1,
+            }),
             sky_texture: new Material(new Texture_Scroll_X(), {
                 color: hex_color("#000000"),
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
@@ -57,7 +61,8 @@ export class Class_Project extends Scene {
 
             text_background: new Material(new Phong_Shader(), {
                 color: hex_color("000000"), 
-                ambient: 1, diffusivity: 0, specularity: 0
+                ambient: 1, diffusivity: 0, specularity: 0,
+                //texture: new Texture("assets/trojan.jpeg", "NEAREST")
             }),
             text_image: new Material(new defs.Textured_Phong(1), {
                 ambient: 1, diffusivity: 0, specularity: 0,
@@ -68,15 +73,16 @@ export class Class_Project extends Scene {
         this.mouseX = -1;
         this.mouseY = -1;
         this.initialized = false;
-
-        this.temp = 0;
         
         this.mouse_ray = undefined; 
         this.objs = [];
         this.score = 0; 
 
         // initial velocities
-        this.vel = [[5,15.5], [7,15]];
+        this.vels = [[5,15.5], [7,15],[-5,15.5], [-7,15]];
+        this.type, this.vx, this.vy = 0;
+        this.texture = null;
+        this.spawn = vec3();
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         
@@ -182,21 +188,27 @@ export class Class_Project extends Scene {
         this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let spawns = [vec3(-4,-2,0), vec3(-5.5,-4,0), vec3(3,-2,0),vec3(4,-2,0)];
+        let spawns = [[-4,-4,0], [-5.5,-4,0], [5.5,-4,0], [4,-4,0]];
 
         let index = Math.floor(t/5);
 
         if (this.objs.length <= index && Math.floor(t)%5 == 0){
             this.objs.push(t);
-            console.log(this.objs);
+            this.type = Math.floor(Math.random() * 4);
+            this.spawn = spawns[this.type];
+            this.vx = this.vels[this.type][0];
+            this.vy = this.vels[this.type][1];
+            this.texture = this.materials.texture1;
+            if (this.type%2 ==0)
+                this.texture = this.materials.texture2;
         }
 
-
+        
         let t2 = t - this.objs[index];
-        this.shapes.sphere.draw(context, program_state, model_transform.times(Mat4.translation(-5.5,-4,0))
+        this.shapes.sphere.draw(context, program_state, model_transform.times(Mat4.translation(this.spawn[0],this.spawn[1], this.spawn[2]))
                                                                        .times(Mat4.scale(0.5,0.5,0.5))
-                                                                       .times(Mat4.translation(7*t2,15*t2-4.9*t2**2,0)),
-                                this.materials.texture1); 
+                                                                       .times(Mat4.translation(this.vx*t2,this.vy*t2-4.9*t2**2,0)),
+                                this.texture); 
 }
 }
 
