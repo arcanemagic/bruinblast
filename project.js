@@ -63,6 +63,7 @@ export class Class_Project extends Scene {
                 color: hex_color("000000"), 
                 ambient: 1, diffusivity: 0, specularity: 0,
                 //texture: new Texture("assets/trojan.jpeg", "NEAREST")
+                // comment
             }),
             text_image: new Material(new defs.Textured_Phong(1), {
                 ambient: 1, diffusivity: 0, specularity: 0,
