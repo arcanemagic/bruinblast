@@ -57,6 +57,8 @@ export class Class_Project extends Scene {
         this.mouseX = -1;
         this.mouseY = -1;
         this.initialized = false;
+
+        this.temp = 0;
         
         this.mouse_ray = undefined; 
         this.objects = {};
@@ -67,9 +69,9 @@ export class Class_Project extends Scene {
 
     make_control_panel() {
         
-        // this.key_triggered_button("Start / stop rotation", ["c"], () => {
-        //     this.rotate ^= 1; 
-        // });
+        this.key_triggered_button("shoot", ["c"], () => {
+            this.rotate ^= 1; 
+        });
        
     }
     
@@ -118,7 +120,7 @@ export class Class_Project extends Scene {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            //program_state.set_camera(Mat4.translation(0, 0, -8));
+            program_state.set_camera(Mat4.translation(0, 0, -8));
         }
 
         
@@ -154,7 +156,17 @@ export class Class_Project extends Scene {
 
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let bomb_transform = model_transform.times(Mat4.translation(-2,0,-8)).times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.scale(0.5,0.5,0.5))
+        let spawns = [vec3(-4,-2,0), vec3(4,-2,0)];
+        
+        let bomb_transform = model_transform.times(Mat4.translation(-4,-2,0)).times(Mat4.scale(0.5,0.5,0.5));
+        if (this.rotate){
+            let t2 = t - this.temp;
+            bomb_transform = bomb_transform.times(Mat4.translation(5*t2,10*t2-4.9*t2**2,0));
+        }
+        else{
+            this.temp = t;
+            bomb_transform = model_transform.times(Mat4.translation(-4,-2,0)).times(Mat4.scale(0.5,0.5,0.5));
+        }
         this.shapes.sphere.draw(context, program_state, bomb_transform, this.materials.texture1); 
     }
 }
