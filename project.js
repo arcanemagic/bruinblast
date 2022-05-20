@@ -24,7 +24,9 @@ export class Class_Project extends Scene {
             cube: new Cube(),
             sphere: new Subdivision_Sphere(4), 
             teapot: new Shape_From_File("assets/teapot.obj"),
-            text: new Text_Line(35)
+            text: new Text_Line(35),
+            bruin: new Shape_From_File("assets/bruin.obj"),
+            trojan: new Shape_From_File("assets/trojan.obj")
         }
         // this.box_1_angle = 0
         // this.box_2_angle = 0
@@ -59,6 +61,10 @@ export class Class_Project extends Scene {
                 texture: new Texture("assets/sky.png", "LINEAR_MIPMAP_LINEAR")
             }),
 
+            bruin_texture: new Material(new Phong_Shader(), {
+                color: color(0, 0, 1, 1), 
+                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
+            }),
             text_background: new Material(new Phong_Shader(), {
                 color: hex_color("000000"), 
                 ambient: 1, diffusivity: 0, specularity: 0,
@@ -79,7 +85,7 @@ export class Class_Project extends Scene {
         this.score = 0; 
 
         // initial velocities
-        this.vels = [[5,15.5], [7,15],[-5,15.5], [-7,15]];
+        this.vels = [[3,15.5], [5,15],[-3,15.5], [-5,15]];
         this.type, this.vx, this.vy = 0;
         this.texture = null;
         this.spawn = vec3();
@@ -181,34 +187,42 @@ export class Class_Project extends Scene {
 
 
         //draw text 
-        let text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2,0.5,0))
+        let text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2.3,0.6,0))
         this.shapes.cube.draw(context, program_state, text_background_transform, this.materials.text_background)
         let text_transform = model_transform.times(Mat4.translation(-5.4,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2))
         this.shapes.text.set_string("Score: " + this.score, context.context);
         this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let spawns = [[-4,-4,0], [-5.5,-4,0], [5.5,-4,0], [4,-4,0]];
+        let spawns = [[-4,-4,0], [-3,-4,0], [2,-4,0], [4,-4,0]];
 
         let index = Math.floor(t/5);
 
         if (this.objs.length <= index && Math.floor(t)%5 == 0){
             this.objs.push(t);
+            this.score++; 
             this.type = Math.floor(Math.random() * 4);
             this.spawn = spawns[this.type];
             this.vx = this.vels[this.type][0];
             this.vy = this.vels[this.type][1];
             this.texture = this.materials.texture1;
-            if (this.type%2 ==0)
-                this.texture = this.materials.texture2;
+            
         }
 
         
+       
         let t2 = t - this.objs[index];
-        this.shapes.sphere.draw(context, program_state, model_transform.times(Mat4.translation(this.spawn[0],this.spawn[1], this.spawn[2]))
-                                                                       .times(Mat4.scale(0.5,0.5,0.5))
-                                                                       .times(Mat4.translation(this.vx*t2,this.vy*t2-4.9*t2**2,0)),
-                                this.texture); 
+        let projectile_transform = model_transform.times(Mat4.translation(this.spawn[0],this.spawn[1], this.spawn[2]))
+        .times(Mat4.scale(0.5,0.5,0.5))
+        .times(Mat4.translation(this.vx*t2,this.vy*t2-4.9*t2**2,0)).times(Mat4.rotation(t, 0, 1, 0))
+        if (this.type % 2){
+        this.shapes.bruin.draw(context, program_state, projectile_transform,
+                                this.materials.bruin_texture); 
+        }
+        else{
+            this.shapes.trojan.draw(context, program_state, projectile_transform,
+                this.materials.bruin_texture.override({color: color(1,0,0,1)})); 
+        }
 }
 }
 
