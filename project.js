@@ -72,9 +72,11 @@ export class Class_Project extends Scene {
         this.temp = 0;
         
         this.mouse_ray = undefined; 
-        this.objects = [];
+        this.objs = [];
         this.score = 0; 
 
+        // initial velocities
+        this.vel = [[5,15.5], [7,15]];
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         
@@ -180,19 +182,22 @@ export class Class_Project extends Scene {
         this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let spawns = [vec3(-4,-2,0), vec3(4,-2,0)];
-    
-        let bomb_transform = model_transform.times(Mat4.translation(-4,-2,0)).times(Mat4.scale(0.5,0.5,0.5));
-        if (this.rotate){
-            let t2 = t - this.temp;
-            bomb_transform = bomb_transform.times(Mat4.translation(5*t2,10*t2-4.9*t2**2,0));
+        let spawns = [vec3(-4,-2,0), vec3(-5.5,-4,0), vec3(3,-2,0),vec3(4,-2,0)];
+
+        let index = Math.floor(t/5);
+
+        if (this.objs.length <= index && Math.floor(t)%5 == 0){
+            this.objs.push(t);
+            console.log(this.objs);
         }
-        else{
-            this.temp = t;
-            bomb_transform = model_transform.times(Mat4.translation(-4,-2,0)).times(Mat4.scale(0.5,0.5,0.5));
-        }
-        this.shapes.sphere.draw(context, program_state, bomb_transform, this.materials.texture1); 
-    }
+
+
+        let t2 = t - this.objs[index];
+        this.shapes.sphere.draw(context, program_state, model_transform.times(Mat4.translation(-5.5,-4,0))
+                                                                       .times(Mat4.scale(0.5,0.5,0.5))
+                                                                       .times(Mat4.translation(7*t2,15*t2-4.9*t2**2,0)),
+                                this.materials.texture1); 
+}
 }
 
 
