@@ -7,7 +7,7 @@ const {
 
 const {Cube, Axis_Arrows, Textured_Phong, Subdivision_Sphere} = defs
 
-export class Assignment4 extends Scene {
+export class Class_Project extends Scene {
     /**
      *  **Base_scene** is a Scene that can be added to any display canvas.
      *  Setup the shapes, materials, camera, and lighting here.
@@ -21,9 +21,7 @@ export class Assignment4 extends Scene {
         //        a cube instance's texture_coords after it is already created.
         this.shapes = {
             box_1: new Cube(),
-            box_2: new Cube(),
             sphere: new Subdivision_Sphere(4), 
-            axis: new Axis_Arrows(),
             teapot: new Shape_From_File("assets/teapot.obj"),
         }
         // this.box_1_angle = 0
@@ -56,20 +54,18 @@ export class Assignment4 extends Scene {
             }),
         }
 
-        //this.context_store = undefined 
-        //TODO: SOPHIA
-        // canvas.addEventListener('click', (e) => {
-        //     const rect = canvas.getBoundingClientRect();
-        //     mouseX = e.clientX - rect.left;
-        //     mouseY = e.clientY - rect.top;
-        //  });
+        this.mouseX = -1;
+        this.mouseY = -1;
+        this.initialized = false;
+        
+        this.mouse_ray = undefined; 
+        this.objects = {};
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
-        this.object_matrices = [] //array to hold all object matrices 
+        
     }
 
     make_control_panel() {
-        // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
         
         // this.key_triggered_button("Start / stop rotation", ["c"], () => {
         //     this.rotate ^= 1; 
@@ -77,38 +73,57 @@ export class Assignment4 extends Scene {
        
     }
     
-    handle_click(event, rect){
-        console.log("mouse clicked")
-        let x = event.clientX - rect.left
-        let y = event.clientY - rect.top 
-        let width = rect.right - rect.left 
-        let height = rect.bottom - rect.top 
+    handle_click(){
+        console.log(this.mouseX)
+        console.log(this.mouseY)
 
-        x = (2.0 * x) / width - 1.0;
-        y = 1.0 - (2.0 * y) / height;
-        let z = -1.0
-        let ray_clip = vec4(x, y, z, 1.0);
-        console.log(x)
-        console.log(y)
-
+        let normalized_coords = this.normalize_coordinates()
+        let clipped_coords = this.clip_coordinates(normalized_coords)
+        let eye_coords = this.convert_to_eye_coordinates(clipped_coords)
        
-        //console.log(event.clientX - rect.left)
-       //console.log(event.clientY - rect.top)
-         
+        this.mouse_ray = this.convert_to_eye_coordinates(eye_coords)
+        console.log(this.mouse_ray)
     }
 
+    normalize_coordinates(){
+        let x = (2.0 * this.mouseX) / this.width - 1.0 
+        let y = 1.0 - (2.0 * this.mouseY) / this.height 
+        let z = 1.0 
+        return vec3(x, y, z)
+    }
+
+
+    clip_coordinates(normalized_coords){
+        return vec4(normalized_coords[0], normalized_coords[1], -1.0, 1.0)
+    }
+
+    convert_to_eye_coordinates(clipped_coords){
+        let inverted_projection_matrix = Mat4.inverse(this.projection_matrix)
+
+        let eye_coords = inverted_projection_matrix.times(clipped_coords)
+        return vec4(eye_coords[0], eye_coords[1], -1.0, 0.0)
+    }
      
+    convert_to_world_coordinates(eye_coords){
+        let inverted_camera_matrix = Mat4.inverse(this.view_matrix)
+        let ray_world = inverted_camera_matrix.times(eye_coords)
+        ray_world = vec3(ray_world[0], ray_world[1], ray_world[2])
+
+        return ray_world.normalize(); 
+
+        
+    }
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(0, 0, -8));
+            //program_state.set_camera(Mat4.translation(0, 0, -8));
         }
 
         
-
-        program_state.projection_transform = Mat4.perspective(
+        this.view_matrix = program_state.camera_inverse; 
+        this.projection_matrix = program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
 
         const light_position = vec4(10, 10, 10, 1);
@@ -117,19 +132,29 @@ export class Assignment4 extends Scene {
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
         
+        const gl = context.context 
+
+
+        //add listener for mouse clicks 
+        if (!this.initialized){
+            gl.canvas.addEventListener("click", (e) => {
+                console.log("click")
+                const rect = context.canvas.getBoundingClientRect(); 
+                this.mouseX = e.clientX - rect.left; 
+                this.mouseY = e.clientY - rect.top; 
+
+                this.width = rect.right - rect.left; 
+                this.height = rect.bottom - rect.top; 
+                this.handle_click()
+
+            })
+            this.initialized = true; 
+        }
         
 
-        // TODO:  Draw the required boxes. Also update their stored matrices.
-        
-        // if (this.rotate){
-        //     this.box_1_angle += 2 * Math.PI / 3 * dt 
-        //     this.box_2_angle += 2 * Math.PI / 2 * dt
-        // }
-        // let cube_1_transform = model_transform.times(Mat4.translation(-2,0,0)).times(Mat4.rotation(this.box_1_angle, 1, 0, 0))//.times(Mat4.scale(2,2,2)); 
-        // let cube_2_transform = model_transform.times(Mat4.translation(2,0,0)).times(Mat4.rotation(this.box_2_angle, 0,1,0))//.times(Mat4.scale(2,2,2)); 
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let bomb_transform = model_transform.times(Mat4.translation(-2,0,0)).times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.scale(0.5,0.5,0.5))
+        let bomb_transform = model_transform.times(Mat4.translation(-2,0,-8)).times(Mat4.rotation(Math.PI/4, 1, 0, 0)).times(Mat4.scale(0.5,0.5,0.5))
         this.shapes.sphere.draw(context, program_state, bomb_transform, this.materials.texture1); 
     }
 }
