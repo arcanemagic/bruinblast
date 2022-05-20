@@ -6,7 +6,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Textured_Phong, Subdivision_Sphere} = defs
+const {Cube, Textured_Phong, Subdivision_Sphere, Phong_Shader} = defs
 
 export class Class_Project extends Scene {
     /**
@@ -16,7 +16,7 @@ export class Class_Project extends Scene {
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
-
+        
         // TODO:  Create two cubes, including one with the default texture coordinates (from 0 to 1), and one with the modified
         //        texture coordinates as required for cube #2.  You can either do this by modifying the cube code or by modifying
         //        a cube instance's texture_coords after it is already created.
@@ -24,6 +24,7 @@ export class Class_Project extends Scene {
             cube: new Cube(),
             sphere: new Subdivision_Sphere(4), 
             teapot: new Shape_From_File("assets/teapot.obj"),
+            text: new Text_Line(35)
         }
         // this.box_1_angle = 0
         // this.box_2_angle = 0
@@ -53,6 +54,15 @@ export class Class_Project extends Scene {
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
                 texture: new Texture("assets/sky.png", "LINEAR_MIPMAP_LINEAR")
             }),
+
+            text_background: new Material(new Phong_Shader(), {
+                color: hex_color("000000"), 
+                ambient: 1, diffusivity: 0, specularity: 0
+            }),
+            text_image: new Material(new defs.Textured_Phong(1), {
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/text.png")
+            })
         }
 
         this.mouseX = -1;
@@ -63,6 +73,8 @@ export class Class_Project extends Scene {
         
         this.mouse_ray = undefined; 
         this.objects = [];
+        this.score = 0; 
+
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         
@@ -157,7 +169,15 @@ export class Class_Project extends Scene {
         //draw sky 
         let sky_model_transform = model_transform.times(Mat4.translation(0,0,-30)).times(Mat4.scale(100,100,0.1))
         this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
+        /////////
 
+
+        //draw text 
+        let text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2,0.5,0))
+        this.shapes.cube.draw(context, program_state, text_background_transform, this.materials.text_background)
+        let text_transform = model_transform.times(Mat4.translation(-5.4,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2))
+        this.shapes.text.set_string("Score: " + this.score, context.context);
+        this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
         let spawns = [vec3(-4,-2,0), vec3(4,-2,0)];
