@@ -82,8 +82,12 @@ export class Class_Project extends Scene {
             
         }
 
-        this.mouseX = -1;
-        this.mouseY = -1;
+        this.start_mouseX = -1;
+        this.start_mouseY = -1;
+        this.end_mouseX = -1; 
+        this.end_mouseY = -1; 
+        this.mouseX = -1 
+        this.mouseY = -1 
         this.initialized = false;
         
         this.mouse_ray = undefined; 
@@ -133,14 +137,28 @@ export class Class_Project extends Scene {
 
         //add listener for mouse clicks 
         if (!this.initialized){
-            gl.canvas.addEventListener("click", (e) => {
-                console.log("click")
-                const rect = context.canvas.getBoundingClientRect(); 
-                this.mouseX = e.clientX - rect.left; 
-                this.mouseY = e.clientY - rect.top; 
+            const rect = context.canvas.getBoundingClientRect() 
+            this.rect_left = rect.left 
+            this.rect_top = rect.top 
+            gl.canvas.addEventListener("mouseup", (e) => {
+                //console.log("Mouse released")
+                //const rect = context.canvas.getBoundingClientRect(); 
+                this.end_mouseX = e.clientX - this.rect_left; 
+                this.end_mouseY = e.clientY - this.rect_top; 
 
                 this.width = rect.right - rect.left; 
                 this.height = rect.bottom - rect.top; 
+                //console.log(` end mouseX: ${this.end_mouseX}  end mouseY: ${this.end_mouseY} `)
+
+            })
+            gl.canvas.addEventListener("mousedown", (e) => {
+                //console.log("Mouse down")
+                //const rect = context.canvas.getBoundingClientRect(); 
+                this.start_mouseX = e.clientX - this.rect_left; 
+                this.start_mouseY = e.clientY - this.rect_top; 
+
+                
+                //console.log(` start mouseX: ${this.start_mouseX}  start mouseY: ${this.start_mouseY} `)
 
             })
             this.initialized = true; 
@@ -162,19 +180,37 @@ export class Class_Project extends Scene {
         // remove dummy models
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         */
+
+        
         let object_id = 20
         let r = Math.floor(object_id / (255*255));
 		let g = Math.floor(object_id / 255) % 256;
 		let b = object_id % 256;
 		let picking_color = color(r/255,g/255,b/255,1);
-        this.shapes.cube.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.picking.override({color:picking_color}))
+        this.shapes.bruin.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.picking.override({color:picking_color}))
 
+        if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
+            this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
+            this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
+        }
+
+        // if (this.mouseX > 0 && this.mouseY > 0 ){
+        //     console.log(`midpoint   x: ${this.mouseX}  y: ${this.mouseY}`)
+        // }
         const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
         const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
         const data = new Uint8Array(4);
         gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
         this.mouseX = -1;
         this.mouseY = -1;
+
+        if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
+            this.start_mouseX = -1 
+            this.start_mouseY = -1 
+            this.end_mouseX = -1 
+            this.end_mouseY = -1 
+        }
+        
 
         // convert RGB of pixel to id value (to compare to object id)
         let selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
@@ -217,7 +253,7 @@ export class Class_Project extends Scene {
             
         }
 
-        this.shapes.cube.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.bruin_texture)
+        this.shapes.bruin.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.bruin_texture)
 
        /*
         let t2 = t - this.objs[index];
