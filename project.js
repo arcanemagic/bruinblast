@@ -6,7 +6,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Textured_Phong, Subdivision_Sphere, Phong_Shader} = defs
+const {Cube, Textured_Phong, Subdivision_Sphere, Phong_Shader, Basic_Shader} = defs
 
 export class Class_Project extends Scene {
     /**
@@ -62,7 +62,7 @@ export class Class_Project extends Scene {
             }),
 
             bruin_texture: new Material(new Phong_Shader(), {
-                color: color(0, 0, 1, 1), 
+                color: color(0, 1, 1, 1), 
                 ambient: 0.5, diffusivity: 0.5, specularity: 0.5
             }),
             text_background: new Material(new Phong_Shader(), {
@@ -73,7 +73,12 @@ export class Class_Project extends Scene {
             text_image: new Material(new defs.Textured_Phong(1), {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
+            }), 
+
+            picking: new Material(new Uniform_Shader(), {
+                color: color(0,1,0,1)
             })
+            
         }
 
         this.mouseX = -1;
@@ -102,46 +107,7 @@ export class Class_Project extends Scene {
        
     }
     
-    handle_click(){
-        console.log(this.mouseX)
-        console.log(this.mouseY)
-
-        let normalized_coords = this.normalize_coordinates()
-        let clipped_coords = this.clip_coordinates(normalized_coords)
-        let eye_coords = this.convert_to_eye_coordinates(clipped_coords)
-       
-        this.mouse_ray = this.convert_to_eye_coordinates(eye_coords)
-        console.log(this.mouse_ray)
-    }
-
-    normalize_coordinates(){
-        let x = (2.0 * this.mouseX) / this.width - 1.0 
-        let y = 1.0 - (2.0 * this.mouseY) / this.height 
-        let z = 1.0 
-        return vec3(x, y, z)
-    }
-
-
-    clip_coordinates(normalized_coords){
-        return vec4(normalized_coords[0], normalized_coords[1], -1.0, 1.0)
-    }
-
-    convert_to_eye_coordinates(clipped_coords){
-        let inverted_projection_matrix = Mat4.inverse(this.projection_matrix)
-
-        let eye_coords = inverted_projection_matrix.times(clipped_coords)
-        return vec4(eye_coords[0], eye_coords[1], -1.0, 0.0)
-    }
-     
-    convert_to_world_coordinates(eye_coords){
-        let inverted_camera_matrix = Mat4.inverse(this.view_matrix)
-        let ray_world = inverted_camera_matrix.times(eye_coords)
-        ray_world = vec3(ray_world[0], ray_world[1], ray_world[2])
-
-        return ray_world.normalize(); 
-
-        
-    }
+    
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
@@ -174,12 +140,53 @@ export class Class_Project extends Scene {
 
                 this.width = rect.right - rect.left; 
                 this.height = rect.bottom - rect.top; 
-                this.handle_click()
 
             })
             this.initialized = true; 
         }
         
+        
+
+        /* TODO: DELETE! SOPHIA 
+        const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
+        const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
+        const data = new Uint8Array(4);
+        gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
+        // reset clicked position
+        this.mouseX = -1;
+        this.mouseY = -1;
+
+        // convert RGB to decimal (model id)
+        const selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
+        // remove dummy models
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        */
+        let object_id = 20
+        let r = Math.floor(object_id / (255*255));
+		let g = Math.floor(object_id / 255) % 256;
+		let b = object_id % 256;
+		let picking_color = color(r/255,g/255,b/255,1);
+        this.shapes.cube.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.picking.override({color:picking_color}))
+
+        const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
+        const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
+        const data = new Uint8Array(4);
+        gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
+        this.mouseX = -1;
+        this.mouseY = -1;
+
+        // convert RGB of pixel to id value (to compare to object id)
+        let selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
+        
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        if (selected_model_id == object_id){
+            console.log("cube clicked!")
+            selected_model_id = -1 
+        }
+        
+
+
         //draw sky 
         let sky_model_transform = model_transform.times(Mat4.translation(0,0,-30)).times(Mat4.scale(100,100,0.1))
         this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
@@ -209,8 +216,9 @@ export class Class_Project extends Scene {
             
         }
 
-        
-       
+        this.shapes.cube.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.bruin_texture)
+
+       /*
         let t2 = t - this.objs[index];
         let projectile_transform = model_transform.times(Mat4.translation(this.spawn[0],this.spawn[1], this.spawn[2]))
         .times(Mat4.scale(0.5,0.5,0.5))
@@ -222,13 +230,13 @@ export class Class_Project extends Scene {
         else{
             this.shapes.trojan.draw(context, program_state, projectile_transform,
                 this.materials.bruin_texture.override({color: color(1,0,0,1)})); 
-        }
+        }*/
+
 }
 }
 
 
 class Texture_Scroll_X extends Textured_Phong {
-    // TODO:  Modify the shader below (right now it's just the same fragment shader as Textured_Phong) for requirement #6.
     fragment_glsl_code() {
         return this.shared_glsl_code() + `
             varying vec2 f_tex_coord;
@@ -245,14 +253,6 @@ class Texture_Scroll_X extends Textured_Phong {
                 vec2 scrolled_tex_coord = vec2(x_coord, y); 
                 vec4 tex_color = texture2D( texture, scrolled_tex_coord);
                 if( tex_color.w < .01 ) discard;
-                                                                         // Compute an initial (ambient) color:
-
-               // is it inside black portion? 
-                // x = mod(x_coord, 1.0); 
-                // y = mod(y, 1.0); 
-                // if (x >= .15 && x <= .85 && y >= .15 && y <= .85 && !(x >= .25 && x <= .75 && y >= .25 && y <= .75)){
-                //     tex_color.xyz *= 0.0; 
-                // }
                
                 gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                 
@@ -263,35 +263,65 @@ class Texture_Scroll_X extends Textured_Phong {
 }
 
 
-class Texture_Rotate extends Textured_Phong {
-    // TODO:  Modify the shader below (right now it's just the same fragment shader as Textured_Phong) for requirement #7.
+
+
+class Uniform_Shader extends Shader {
+    //This shader gives the object one color, determined by "color" passed in 
+
+    constructor() {
+        super();
+    }
+
+    shared_glsl_code() {
+        // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
+        return ` 
+            precision mediump float;
+            uniform vec4 shape_color;
+            uniform vec3 squared_scale, camera_center;
+        `;
+    }
+
+    vertex_glsl_code() {
+        // ********* VERTEX SHADER *********
+        return this.shared_glsl_code() + `
+            attribute vec3 position, normal;                            
+            uniform mat4 model_transform;
+            uniform mat4 projection_camera_model_transform;
+            void main(){                                                                   
+                gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
+              } `;
+    }
+
     fragment_glsl_code() {
         return this.shared_glsl_code() + `
-            varying vec2 f_tex_coord;
-            uniform sampler2D texture;
-            uniform float animation_time;
-            void main(){
-                // Sample the texture image in the correct place:
-                float PI = 3.14159265; 
-                float angle = -mod(0.5 * PI * animation_time, 20.0 * PI); 
-                mat2 rotation_transform_matrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
-                vec2 rotated_tex_coord = rotation_transform_matrix * (f_tex_coord.xy - 0.5) + 0.5; 
-                vec4 tex_color = texture2D( texture, rotated_tex_coord );
+            void main(){                                                           
+                gl_FragColor = vec4( shape_color.xyz, shape_color.w );
+            } `;
+    }
 
-               
-                if( tex_color.w < .01 ) discard;
+    send_material(gl, gpu, material) {
+        gl.uniform4fv(gpu.shape_color, material.color);
+    }
 
-                float x = rotated_tex_coord.x; 
-                float y = rotated_tex_coord.y;
+    send_gpu_state(gl, gpu, gpu_state, model_transform) {
+        const O = vec4(0, 0, 0, 1), camera_center = gpu_state.camera_transform.times(O).to3();
+        gl.uniform3fv(gpu.camera_center, camera_center);
+        const squared_scale = model_transform.reduce(
+            (acc, r) => {
+                return acc.plus(vec4(...r).times_pairwise(r))
+            }, vec4(0, 0, 0, 0)).to3();
+        gl.uniform3fv(gpu.squared_scale, squared_scale);
+        const PCM = gpu_state.projection_transform.times(gpu_state.camera_inverse).times(model_transform);
+        gl.uniformMatrix4fv(gpu.model_transform, false, Matrix.flatten_2D_to_1D(model_transform.transposed()));
+        gl.uniformMatrix4fv(gpu.projection_camera_model_transform, false, Matrix.flatten_2D_to_1D(PCM.transposed()));
 
-                if (x >= .15 && x <= .85 && y >= .15 && y <= .85 && !(x >= .25 && x <= .75 && y >= .25 && y <= .75)){
-                    tex_color.xyz *= 0.0; 
-                }
-                                                                         // Compute an initial (ambient) color:
-                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
-                                                                         // Compute the final color with contributions from lights:
-                gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
-        } `;
+       
+    }
+
+    update_GPU(context, gpu_addresses, gpu_state, model_transform, material) {
+        const defaults = {color: color(0, 0, 0, 1)};
+        material = Object.assign({}, defaults, material);
+        this.send_material(context, gpu_addresses, material);
+        this.send_gpu_state(context, gpu_addresses, gpu_state, model_transform);
     }
 }
-
