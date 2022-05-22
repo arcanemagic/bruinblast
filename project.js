@@ -166,27 +166,18 @@ export class Class_Project extends Scene {
         
         
 
-        /* TODO: DELETE! SOPHIA 
-        const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
-        const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
-        const data = new Uint8Array(4);
-        gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
-        // reset clicked position
-        this.mouseX = -1;
-        this.mouseY = -1;
-
-        // convert RGB to decimal (model id)
-        const selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
-        // remove dummy models
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        */
+        
 
         
         let object_id = 20
-        let r = Math.floor(object_id / (255*255));
-		let g = Math.floor(object_id / 255) % 256;
-		let b = object_id % 256;
-		let picking_color = color(r/255,g/255,b/255,1);
+
+       
+        
+        //from https://webglfundamentals.org/webgl/lessons/webgl-picking.html
+        let red = ((object_id >> 16) & 0xFF) / 255; //3rd byte from right  
+		let green = ((object_id >> 8) & 0xFF) / 255; 
+		let blue = ((object_id >> 0) & 0xFF) / 255; //least significant byte 
+		let picking_color = color(red,green,blue,1);
         this.shapes.bruin.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.picking.override({color:picking_color}))
 
         if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
@@ -194,9 +185,7 @@ export class Class_Project extends Scene {
             this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
         }
 
-        // if (this.mouseX > 0 && this.mouseY > 0 ){
-        //     console.log(`midpoint   x: ${this.mouseX}  y: ${this.mouseY}`)
-        // }
+        //from https://webglfundamentals.org/webgl/lessons/webgl-picking.html
         const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
         const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
         const data = new Uint8Array(4);
