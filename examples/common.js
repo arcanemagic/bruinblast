@@ -875,6 +875,7 @@ const Movement_Controls = defs.Movement_Controls =
             // make_control_panel(): Sets up a panel of interactive HTML elements, including
             // buttons with key bindings for affecting this scene, and live info readouts.
 
+            //SOPHIA: disabled steering
             /*
             this.control_panel.innerHTML += "Click and drag the scene to spin your viewpoint around it.<br>";
             this.live_string(box => box.textContent = "- Position: " + this.pos[0].toFixed(2) + ", " + this.pos[1].toFixed(2)

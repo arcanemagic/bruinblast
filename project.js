@@ -1,25 +1,18 @@
 import {defs, tiny} from './examples/common.js';
 import { Shape_From_File } from './examples/obj-file-demo.js';
 import { Text_Line } from './examples/text-demo.js';
+import { Game_Object} from './object.js'
+
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Textured_Phong, Subdivision_Sphere, Phong_Shader, Basic_Shader} = defs
+const {Cube, Textured_Phong, Subdivision_Sphere, Phong_Shader} = defs
 
 export class Class_Project extends Scene {
-    /**
-     *  **Base_scene** is a Scene that can be added to any display canvas.
-     *  Setup the shapes, materials, camera, and lighting here.
-     */
     constructor() {
-        // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
-        
-        // TODO:  Create two cubes, including one with the default texture coordinates (from 0 to 1), and one with the modified
-        //        texture coordinates as required for cube #2.  You can either do this by modifying the cube code or by modifying
-        //        a cube instance's texture_coords after it is already created.
         this.shapes = {
             cube: new Cube(),
             sphere: new Subdivision_Sphere(4), 
@@ -28,33 +21,11 @@ export class Class_Project extends Scene {
             bruin: new Shape_From_File("assets/bruin.obj"),
             trojan: new Shape_From_File("assets/trojan.obj")
         }
-        // this.box_1_angle = 0
-        // this.box_2_angle = 0
-        // this.rotate = 1
 
-        //console.log(this.shapes.cube.arrays.texture_coord)
-
-        for (let i = 0; i < 24; i++){
-            this.shapes.cube.arrays.texture_coord[i] = this.shapes.cube.arrays.texture_coord[i].times(4)
-        }
-        for (let i = 0; i < 1091; i++){
-            this.shapes.sphere.arrays.texture_coord[i] = this.shapes.sphere.arrays.texture_coord[i].times(2); 
-        }
+       
 
 
         this.materials = {
-            phong: new Material(new Textured_Phong(), {
-                color: hex_color("#ffffff"),
-            }),
-            texture1: new Material(new Textured_Phong(), {
-                color: color(1,0,0,1),
-                ambient: 1, diffusivity: 0.1, specularity: 0.1,
-                texture: new Texture("assets/trojan.jpeg", "NEAREST")
-            }),
-            texture2: new Material(new Textured_Phong(), {
-                color: color(1,0,0,1),
-                ambient: 1, diffusivity: 0.1, specularity: 0.1,
-            }),
             sky_texture: new Material(new Texture_Scroll_X(), {
                 color: hex_color("#000000"),
                 ambient: 1, diffusivity: 0.1, specularity: 0.1,
@@ -68,8 +39,6 @@ export class Class_Project extends Scene {
             text_background: new Material(new Phong_Shader(), {
                 color: hex_color("000000"), 
                 ambient: 1, diffusivity: 0, specularity: 0,
-                //texture: new Texture("assets/trojan.jpeg", "NEAREST")
-                // comment
             }),
             text_image: new Material(new defs.Textured_Phong(1), {
                 ambient: 1, diffusivity: 0, specularity: 0,
@@ -89,8 +58,8 @@ export class Class_Project extends Scene {
         this.mouseX = -1 
         this.mouseY = -1 
         this.initialized = false;
-        
-        this.mouse_ray = undefined; 
+        this.lives = 3 
+
         this.objs = [];
         this.score = 0; 
 
@@ -102,6 +71,7 @@ export class Class_Project extends Scene {
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         
+        //this.objs.push(new Game_Object(0))
     }
 
     make_control_panel() {
@@ -112,7 +82,14 @@ export class Class_Project extends Scene {
        
     }
     
-    
+    make_picking_color(object_id){
+        //from https://webglfundamentals.org/webgl/lessons/webgl-picking.html
+        let red = ((object_id >> 16) & 0xFF) / 255; //3rd byte from right  
+		let green = ((object_id >> 8) & 0xFF) / 255; 
+		let blue = ((object_id >> 0) & 0xFF) / 255; //least significant byte 
+		let picking_color = color(red,green,blue,1);
+        return picking_color
+    }
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
@@ -140,25 +117,24 @@ export class Class_Project extends Scene {
             const rect = context.canvas.getBoundingClientRect() 
             this.rect_left = rect.left 
             this.rect_top = rect.top 
+           
             gl.canvas.addEventListener("mouseup", (e) => {
-                //console.log("Mouse released")
-                //const rect = context.canvas.getBoundingClientRect(); 
+              
                 this.end_mouseX = e.clientX - this.rect_left; 
                 this.end_mouseY = e.clientY - this.rect_top; 
 
                 this.width = rect.right - rect.left; 
                 this.height = rect.bottom - rect.top; 
-                //console.log(` end mouseX: ${this.end_mouseX}  end mouseY: ${this.end_mouseY} `)
+                
+                
+               
 
             })
             gl.canvas.addEventListener("mousedown", (e) => {
-                //console.log("Mouse down")
-                //const rect = context.canvas.getBoundingClientRect(); 
+                
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
-                
-                //console.log(` start mouseX: ${this.start_mouseX}  start mouseY: ${this.start_mouseY} `)
 
             })
             this.initialized = true; 
@@ -166,26 +142,36 @@ export class Class_Project extends Scene {
         
         
 
-        
+        //update transformation matrices of each active object 
 
-        
-        let object_id = 20
+        let index = Math.floor(t/5);
 
+      
+
+
+        //spawn new object 
+        //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
+       if (this.objs.length <= index && Math.floor(t)%5 == 0){
+           this.objs.push(new Game_Object(t));            
+       }
+
+
+       let object_id = 20 
+       for (let i = 0; i < this.objs.length; i++, object_id++){
+           this.objs[i].update_state(t)
+           this.objs[i].est_id(object_id)
+           this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
+       }
+       for (let i = 0; i < this.objs.length; i++){
+        this.objs[i].draw_picking(context, program_state)
+       }
        
-        
-        //from https://webglfundamentals.org/webgl/lessons/webgl-picking.html
-        let red = ((object_id >> 16) & 0xFF) / 255; //3rd byte from right  
-		let green = ((object_id >> 8) & 0xFF) / 255; 
-		let blue = ((object_id >> 0) & 0xFF) / 255; //least significant byte 
-		let picking_color = color(red,green,blue,1);
-        this.shapes.bruin.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.picking.override({color:picking_color}))
 
-        if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
-            this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
-            this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
-        }
+       if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
+        this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
+        this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
+       }
 
-        //from https://webglfundamentals.org/webgl/lessons/webgl-picking.html
         const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
         const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
         const data = new Uint8Array(4);
@@ -206,11 +192,23 @@ export class Class_Project extends Scene {
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        if (selected_model_id == object_id){
-            console.log("cube clicked!")
-            selected_model_id = -1 
+        for (let i = 0; i < this.objs.length; i++){
+            if (selected_model_id == this.objs[i].id){
+                this.objs[i].interact()
+                selected_model_id = -1 
+                break
+            }
         }
         
+
+        for (let i = 0; i < this.objs.length; i++){
+            this.objs[i].draw_actual(context, program_state)
+        }
+
+
+     
+        
+
 
 
         //draw sky 
@@ -226,37 +224,9 @@ export class Class_Project extends Scene {
         this.shapes.text.set_string("Score: " + this.score, context.context);
         this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
-        // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
-        let spawns = [[-4,-4,0], [-3,-4,0], [2,-4,0], [4,-4,0]];
+        
 
-        let index = Math.floor(t/5);
-
-        if (this.objs.length <= index && Math.floor(t)%5 == 0){
-            this.objs.push(t);
-            this.score++; 
-            this.type = Math.floor(Math.random() * 4);
-            this.spawn = spawns[this.type];
-            this.vx = this.vels[this.type][0];
-            this.vy = this.vels[this.type][1];
-            this.texture = this.materials.texture1;
-            
-        }
-
-        this.shapes.bruin.draw(context, program_state, model_transform.times(Mat4.translation(-2,0,0)), this.materials.bruin_texture)
-
-       /*
-        let t2 = t - this.objs[index];
-        let projectile_transform = model_transform.times(Mat4.translation(this.spawn[0],this.spawn[1], this.spawn[2]))
-        .times(Mat4.scale(0.5,0.5,0.5))
-        .times(Mat4.translation(this.vx*t2,this.vy*t2-4.9*t2**2,0)).times(Mat4.rotation(t, 0, 1, 0))
-        if (this.type % 2){
-        this.shapes.bruin.draw(context, program_state, projectile_transform,
-                                this.materials.bruin_texture); 
-        }
-        else{
-            this.shapes.trojan.draw(context, program_state, projectile_transform,
-                this.materials.bruin_texture.override({color: color(1,0,0,1)})); 
-        }*/
+       
 
 }
 }
@@ -291,7 +261,7 @@ class Texture_Scroll_X extends Textured_Phong {
 
 
 
-class Uniform_Shader extends Shader {
+export class Uniform_Shader extends Shader {
     //This shader gives the object one color, determined by "color" passed in 
 
     constructor() {
