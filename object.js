@@ -174,8 +174,9 @@ export class Game_Object{
     
         
         draw_actual(context, program_state){
-    
+            
             if (this.type == "bruin"){
+                //ignore slashing
                 if (true){
                     this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
                     this.materials.bruin_texture); 
