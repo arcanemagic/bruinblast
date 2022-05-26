@@ -852,7 +852,7 @@ const Movement_Controls = defs.Movement_Controls =
 
             //SOPHIA: Disabled steering 
             //Set up mouse response.  The last one stops us from reacting if the mouse leaves the canvas:
-            /*
+            
             document.addEventListener("mouseup", e => {
                 this.mouse.anchor = undefined;
             });
@@ -866,7 +866,7 @@ const Movement_Controls = defs.Movement_Controls =
             });
             canvas.addEventListener("mouseout", e => {
                 if (!this.mouse.anchor) this.mouse.from_center.scale_by(0)
-            });*/
+            });
         }
 
         show_explanation(document_element) {
@@ -877,7 +877,7 @@ const Movement_Controls = defs.Movement_Controls =
             // buttons with key bindings for affecting this scene, and live info readouts.
 
             //SOPHIA: disabled steering
-            /*
+            
             this.control_panel.innerHTML += "Click and drag the scene to spin your viewpoint around it.<br>";
             this.live_string(box => box.textContent = "- Position: " + this.pos[0].toFixed(2) + ", " + this.pos[1].toFixed(2)
                 + ", " + this.pos[2].toFixed(2));
@@ -940,7 +940,7 @@ const Movement_Controls = defs.Movement_Controls =
                 () => {
                     this.will_take_over_graphics_state = true
                 }, "#8B8885");
-            this.new_line();*/
+            this.new_line();
         }
 
         first_person_flyaround(radians_per_frame, meters_per_frame, leeway = 70) {

@@ -22,8 +22,33 @@ export class Game_Object{
             //this.active : should the object be rendered or not 
     
             this.model_transform = Mat4.identity();
-            this.spawn_locations = [[-6,1.2,0], [-5,-4,0], [-3,-4,0], [1, -4, 0], [1, -4, 0], [3,-4,0], [5,-4,0], [6,1.2,0]];
-            this.spawn_velocities =  [[4,0], [3.2,8], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5],[-3.2,8], [-4,0]];
+           // this.spawn_locations = [[-6,1.2,0], [-5,-4,0], [-3,-4,0], [1, -4, 0], [1, -4, 0], [3,-4,0], [5,-4,0], [6,1.2,0]];
+            //this.spawn_velocities =  [[0,4], [3.2,8], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5],[-3.2,8], [2.7,8.5]];
+
+                                //arranged as spawn location, spawn velocity 
+            this.spawn_pairs = [[[-6,1.2,0], [3.5, 0]], //spawn on left up side 1
+                                [[-6,1.2,0], [ 5, 0]],   //2
+                                [[-6,1.2,0], [ 4, 0]],  //3
+                                [[6,1.2,0], [-3.5, 0]], //spawn on right up side 4
+                                [[6, 1.2, 0], [ -5, 0]],//5
+                                [[6, 1.2, 0], [-4, 0]],//6
+                                [[-5, -4, 0], [3.2, 8]], //7
+                                [[-5, -4, 0], [2.7, 8.5]],//8
+                                [[-3, -4, 0], [2, 8.5]],//9
+                                [[-5, -4, 0], [2, 8.5]],//10
+                                [[-3, -4, 0], [2.7, 8.5]],//11
+                                [[-3, -4, 0], [2.3, 8]],//12
+                                [[1, -4, 0], [0, 7]],//13
+                                [ [1, -4, 0], [-1, 8]], //14
+                                [[0, -4, 0], [0, 7]],//15
+                                [[3, -4, 0], [-2, 8.5]],//16
+                                [[3, -4, 0], [-2.7, 8]],//17
+                                [[3, -4, 0], [-2.4, 8]],//18
+                                [[5, -4, 0], [-2, 8.5]],//19
+                                [[5, -4, 0], [-2.8, 8]],//20
+                                [[5, -4, 0], [-3, 8.5]],//21
+                                [[5, -4, 0], [-3, 8.2]],//22
+                               ]
             this.gravity = 3.9;
             this.types = ["bruin", "bruin", "bruin", "trojan", "trojan", "trojan", "trojan", "bomb"]
     
@@ -64,10 +89,12 @@ export class Game_Object{
         setup(time){
             this.spawn_time = time
             this.active = 1
-            let num = Math.floor(Math.random() * 8);
+            let num = Math.floor(Math.random() * 22);
             this.type = this.types[Math.floor(Math.random() * 8)] //which literal object we're going to draw 
-            this.spawn_location = this.spawn_locations[num];
-            this.spawn_velocity = this.spawn_velocities[num];
+            this.spawn_location = this.spawn_pairs[num][0];
+            this.spawn_velocity = this.spawn_pairs[num][1];
+
+           
             this.vx = this.spawn_velocity[0];
             this.vy = this.spawn_velocity[1];
             if (this.vy == 0)
@@ -91,7 +118,7 @@ export class Game_Object{
         update_state(time, scene = 0){
             let t2 = time - this.spawn_time 
     
-            this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], this.spawn_location[2]))
+            this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], 0))
                                                             .times(Mat4.translation(this.vx*t2, this.vy*t2-this.gravity*t2**2, 0))
             /*.times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))*/
     
@@ -106,9 +133,11 @@ export class Game_Object{
     
                 console.log(`${this.type} fell off screen`)
                 //TODO: SOPHIA
-                if (this.type == "trojan"){
-                    this.decrement_lives(scene)
-                }
+
+                // UNCOMMENT: SOPHIA
+                // if (this.type == "trojan"){
+                //     this.decrement_lives(scene)
+                // }
             }
         }
     
@@ -147,7 +176,7 @@ export class Game_Object{
         draw_actual(context, program_state){
     
             if (this.type == "bruin"){
-                if (!this.slashed){
+                if (true){
                     this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
                     this.materials.bruin_texture); 
                     this.projectile_transform1 = this.projectile_transform;
@@ -165,7 +194,7 @@ export class Game_Object{
     
             }
             else if (this.type == "trojan"){
-                if (!this.slashed){
+                if (true){
                     this.shapes.trojan.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
                     this.materials.trojan_texture); 
                     this.projectile_transform1 = this.projectile_transform;
