@@ -8,8 +8,15 @@ const {
 
 const {Phong_Shader} = defs
 export class Game_Object{
-    constructor(spawn_time){
-        this.spawn_time = spawn_time
+    constructor(){
+       
+
+        //things you can access in this object: 
+        //this.spawn_time : time at which object was spawned 
+        //this.projectile_transform: object's transformation matrix 
+        //this.vx : object's horizontal velocity 
+        //this.vy : object's vertical velocity 
+        
         this.model_transform = Mat4.identity();
         let spawn_locations = [[-3,-4,0], [-2,-4,0], [0, -4, 0], [0, -4, 0], [2,-4,0], [3,-4,0]];
         let spawn_velocities =  [[1.5,8], [2.5,8],[-1.5,8], [-2.5,8]];
@@ -59,6 +66,9 @@ export class Game_Object{
 
     }
 
+    set_spawn_time(time){
+        this.spawn_time = time 
+    }
     update_state(time, scene = 0){
         let t2 = time - this.spawn_time 
 

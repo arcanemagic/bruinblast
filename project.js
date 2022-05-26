@@ -45,9 +45,7 @@ export class Class_Project extends Scene {
                 texture: new Texture("assets/text.png")
             }), 
 
-            picking: new Material(new Uniform_Shader(), {
-                color: color(0,1,0,1)
-            })
+            
             
         }
 
@@ -64,13 +62,18 @@ export class Class_Project extends Scene {
         this.score = 0; 
 
         // initial velocities
-        this.vels = [[3,15.5], [5,15],[-3,15.5], [-5,15]];
-        this.type, this.vx, this.vy = 0;
-        this.texture = null;
-        this.spawn = vec3();
+        
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
-        
+
+        this.objects_deposit = []
+        for (let i = 0; i < 50; i++){
+            this.objects_deposit.push(new Game_Object())
+        }
+        this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
+
+       
+     
         //this.objs.push(new Game_Object(0))
     }
 
@@ -138,102 +141,107 @@ export class Class_Project extends Scene {
 
 
             })
+
+           
             this.initialized = true; 
         }
         
         
 
-        //update transformation matrices of each active object 
+    //update transformation matrices of each active object 
 
-        let index = Math.floor(t/5);
+        let index = Math.floor((t)/5);
 
-      
-
-
-        //spawn new object 
-        //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
-       if (this.objs.length <= index && Math.floor(t)%5 == 0){
-           this.objs.push(new Game_Object(t));            
-       }
+        
 
 
-       let object_id = 20 
-       for (let i = 0; i < this.objs.length; i++, object_id++){
-           this.objs[i].update_state(t)
-           this.objs[i].est_id(object_id)
-           this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
-       }
-       for (let i = 0; i < this.objs.length; i++){
-        this.objs[i].draw_picking(context, program_state)
-       }
-       
-       /////// IGNORE THIS: Mouse picking implementation 
-       if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
-        this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
-        this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
-       }
+            //spawn new object 
+            //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
+        if (this.objs.length <= index && Math.floor(t)%5 == 0){
+            this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
+            (this.objs[this.objects_deposit_index]).set_spawn_time(t)
+            this.objects_deposit_index++ 
+            console.log(this.objects_deposit_index)          
+        }
 
-        const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
-        const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
-        const data = new Uint8Array(4);
-        gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
-        this.mouseX = -1;
-        this.mouseY = -1;
 
+        let object_id = 20 
+        for (let i = 0; i < this.objs.length; i++, object_id++){
+            this.objs[i].update_state(t)
+            this.objs[i].est_id(object_id)
+            this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
+        }
+        for (let i = 0; i < this.objs.length; i++){
+            this.objs[i].draw_picking(context, program_state)
+        }
+        
+        /////// IGNORE THIS: Mouse picking implementation 
         if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
-            this.start_mouseX = -1 
-            this.start_mouseY = -1 
-            this.end_mouseX = -1 
-            this.end_mouseY = -1 
+            this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
+            this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
         }
-        
 
-        // convert RGB of pixel to id value (to compare to object id)
-        let selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
-        
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
+            const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
+            const data = new Uint8Array(4);
+            gl.readPixels(pixelX,pixelY,1,1,gl.RGBA,gl.UNSIGNED_BYTE,data);
+            this.mouseX = -1;
+            this.mouseY = -1;
 
-
-        //what to do if the object gets clicked-- see interact() function in object.js
-        for (let i = 0; i < this.objs.length; i++){
-            if (selected_model_id == this.objs[i].id){
-                this.objs[i].interact()
-                selected_model_id = -1 
-                break
+            if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
+                this.start_mouseX = -1 
+                this.start_mouseY = -1 
+                this.end_mouseX = -1 
+                this.end_mouseY = -1 
             }
-        }
-        
-        //////// END OF MOUSE PICKING IMPLEMENTATION 
+            
+
+            // convert RGB of pixel to id value (to compare to object id)
+            let selected_model_id = data[0]*256*256 + data[1]*256 + data[2];
+            
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+            //what to do if the object gets clicked-- see interact() function in object.js
+            for (let i = 0; i < this.objs.length; i++){
+                if (selected_model_id == this.objs[i].id){
+                    this.objs[i].interact()
+                    selected_model_id = -1 
+                    break
+                }
+            }
+            
+            //////// END OF MOUSE PICKING IMPLEMENTATION 
 
 
 
-        for (let i = 0; i < this.objs.length; i++){
-            this.objs[i].draw_actual(context, program_state)
-        }
+            for (let i = 0; i < this.objs.length; i++){
+                this.objs[i].draw_actual(context, program_state)
+            }
 
-
-     
-        
-
-
-
-        //draw sky 
-        let sky_model_transform = model_transform.times(Mat4.translation(0,0,-30)).times(Mat4.scale(100,100,0.1))
-        this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
-        /////////
-
-
-        //draw text 
-        let text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2.3,0.6,0))
-        this.shapes.cube.draw(context, program_state, text_background_transform, this.materials.text_background)
-        let text_transform = model_transform.times(Mat4.translation(-5.4,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2))
-        this.shapes.text.set_string("Score: " + this.score, context.context);
-        this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
 
         
+            
+
+
+
+            //draw sky 
+            let sky_model_transform = model_transform.times(Mat4.translation(0,0,-30)).times(Mat4.scale(100,100,0.1))
+            this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
+            /////////
+
+
+            //draw text 
+            let text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2.3,0.6,0))
+            this.shapes.cube.draw(context, program_state, text_background_transform, this.materials.text_background)
+            let text_transform = model_transform.times(Mat4.translation(-5.4,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2))
+            this.shapes.text.set_string("Score: " + this.score, context.context);
+            this.shapes.text.draw(context, program_state, text_transform, this.materials.text_image)
+
+    
 
        
-
+    
 }
 }
 
