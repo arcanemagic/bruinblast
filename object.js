@@ -19,9 +19,9 @@ export class Game_Object{
         //this.active : should the object be rendered or not 
 
         this.model_transform = Mat4.identity();
-        this.spawn_locations = [[-3,-4,0], [-2,-4,0], [0, -4, 0], [0, -4, 0], [2,-4,0], [3,-4,0]];
-        this.spawn_velocities =  [[1.5,8], [2.5,8],[-1.5,8], [-2.5,8]];
-        
+        this.spawn_locations = [[-6,1.2,0], [-5,-4,0], [-3,-4,0], [1, -4, 0], [1, -4, 0], [3,-4,0], [5,-4,0], [6,1.2,0]];
+        this.spawn_velocities =  [[4,0], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5], [4,0]];
+        this.gravity = 3.9;
         this.types = ["bruin", "trojan", "bomb"]
 
         this.active = 1
@@ -55,12 +55,16 @@ export class Game_Object{
 
     setup(time){
         this.spawn_time = time
-        this.spawn_location = this.spawn_locations[Math.floor(Math.random() * 6)];
-        this.spawn_velocity = this.spawn_velocities[Math.floor(Math.random() * 3)]
-        this.vx = this.spawn_velocity[0]
-        this.vy = this.spawn_velocity[1]
-
+        let num = Math.floor(Math.random() * 6);
         this.type = this.types[Math.floor(Math.random() * 3)] //which literal object we're going to draw 
+        this.spawn_location = this.spawn_locations[num];
+        this.spawn_velocity = this.spawn_velocities[num];
+        this.vx = this.spawn_velocity[0];
+        this.vy = this.spawn_velocity[1];
+        if (this.vy == 0)
+            this.gravity = 1.05;
+        else
+            this.gravity = 3.9;
         
         if (this.type == "bruin"){
             this.scale = .75 
@@ -79,7 +83,8 @@ export class Game_Object{
         let t2 = time - this.spawn_time 
 
         this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], this.spawn_location[2]))
-                                                        .times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))
+                                                        .times(Mat4.translation(this.vx*t2, this.vy*t2-this.gravity*t2**2, 0))
+        /*.times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))*/
 
                                             
         //add control for if trojan goes off screen without being slashed    
@@ -100,6 +105,8 @@ export class Game_Object{
         if (scene.lives <= 0){
             scene.status = 2
         }
+                                                      
+        //add control for if trojan goes off screen without being slashed            
     }
 
     est_picking_color(color){
