@@ -163,8 +163,8 @@ export class Class_Project extends Scene {
                 
             })
             gl.canvas.addEventListener("mousedown", (e) => {
-                
                 console.log("mouse clicked")
+                console.log(this.objs[this.objs.length-1].spawn_location)
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
@@ -299,6 +299,7 @@ export class Class_Project extends Scene {
                     case 'u':
                         this.shapes.u.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 'l':
+                        text_transform2 = text_transform2.times(Mat4.scale(1.3,1,1.5));
                         this.shapes.l.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 's':
                         this.shapes.s.draw(context, program_state, text_transform2, this.materials.letter_texture); break;

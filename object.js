@@ -20,18 +20,23 @@ export class Game_Object{
 
         this.model_transform = Mat4.identity();
         this.spawn_locations = [[-6,1.2,0], [-5,-4,0], [-3,-4,0], [1, -4, 0], [1, -4, 0], [3,-4,0], [5,-4,0], [6,1.2,0]];
-        this.spawn_velocities =  [[4,0], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5], [4,0]];
+        this.spawn_velocities =  [[4,0], [3.2,8], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5],[-3.2,8], [-4,0]];
         this.gravity = 3.9;
         this.types = ["bruin", "trojan", "bomb"]
 
         this.active = 1
-        
+        this.slashed = false;
         
         this.shapes = {
             cube: new Cube(),
             bruin: new Shape_From_File("assets/bruin.obj"),
             trojan: new Shape_From_File("assets/trojan.obj"),
-            bomb: new Shape_From_File("assets/bomb.obj")
+            bomb: new Shape_From_File("assets/bomb.obj"),
+            bruin1: new Shape_From_File("assets/bear-half-2.obj"),
+            bruin2: new Shape_From_File("assets/bear-half.obj"),
+            trojan1: new Shape_From_File("assets/trojan-half-2.obj"),
+            trojan2: new Shape_From_File("assets/trojan-half-2.obj"),
+
         }
         this.materials = {
             bruin_texture: new Material(new Phong_Shader(), {
@@ -55,7 +60,7 @@ export class Game_Object{
 
     setup(time){
         this.spawn_time = time
-        let num = Math.floor(Math.random() * 6);
+        let num = Math.floor(Math.random() * 8);
         this.type = this.types[Math.floor(Math.random() * 3)] //which literal object we're going to draw 
         this.spawn_location = this.spawn_locations[num];
         this.spawn_velocity = this.spawn_velocities[num];
@@ -135,12 +140,39 @@ export class Game_Object{
     draw_actual(context, program_state){
 
         if (this.type == "bruin"){
-            this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
-            this.materials.bruin_texture); 
+            if (!this.slashed){
+                this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.bruin_texture); 
+                this.projectile_transform1 = this.projectile_transform;
+                this.projectile_transform2 = this.projectile_transform;
+            }
+            else {
+                let t2 = program_state.animation_time - this.spawn_time
+                this.projectile_transform1 = this.projectile_transform1.times(Mat4.translation(0.2,-0.1, 0))
+                this.projectile_transform2 = this.projectile_transform2.times(Mat4.translation(-0.2,0.1, 0))
+                this.shapes.bruin1.draw(context, program_state, this.projectile_transform1.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.bruin_texture); 
+                this.shapes.bruin2.draw(context, program_state, this.projectile_transform2.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.bruin_texture); 
+            }
+
         }
         else if (this.type == "trojan"){
-            this.shapes.trojan.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
-            this.materials.trojan_texture); 
+            if (!this.slashed){
+                this.shapes.trojan.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.trojan_texture); 
+                this.projectile_transform1 = this.projectile_transform;
+                this.projectile_transform2 = this.projectile_transform;
+            }
+            else {
+                let t2 = program_state.animation_time - this.spawn_time
+                this.projectile_transform1 = this.projectile_transform1.times(Mat4.translation(0.5,-0.1, 0))
+                this.projectile_transform2 = this.projectile_transform2.times(Mat4.translation(-0.5,0.1, 0))
+                this.shapes.trojan1.draw(context, program_state, this.projectile_transform1.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.trojan_texture); 
+                this.shapes.trojan2.draw(context, program_state, this.projectile_transform2.times(Mat4.scale(this.scale,this.scale,this.scale)),
+                this.materials.trojan_texture); 
+            }
         }
         else {
             this.shapes.bomb.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
@@ -151,10 +183,12 @@ export class Game_Object{
         this.active = 0
         if (this.type == "bruin"){
             this.decrement_lives(scene)
+            this.slashed = true
             console.log("BRUIN slashed")
         }
         else if (this.type == "trojan"){
             scene.score++ 
+            this.slashed = true
             console.log("TROJAN slashed")
         }
         else {
