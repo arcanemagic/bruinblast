@@ -193,6 +193,7 @@ export class Class_Project extends Scene {
 
 
         let object_id = 20 
+        let temp_objs = []
         for (let i = 0; i < this.objs.length; i++, object_id++){
             this.objs[i].update_state(t, this)
             this.objs[i].est_id(object_id)
