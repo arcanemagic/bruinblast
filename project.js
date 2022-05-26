@@ -46,6 +46,10 @@ export class Class_Project extends Scene {
                 color: color(0, 1, 1, 1), 
                 ambient: 0.5, diffusivity: 0.5, specularity: 0.5
             }),
+            trojan_texture: new Material(new Phong_Shader(), {
+                color: color(1, 0, 0, 1), 
+                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
+            }), 
             text_background: new Material(new Phong_Shader(), {
                 color: hex_color("000000"), 
                 ambient: 1, diffusivity: 0, specularity: 0,
@@ -73,7 +77,7 @@ export class Class_Project extends Scene {
         this.score = 0; 
 
        
-        this.time_limit = [0,0];
+        this.time_limit = ['',''];
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
@@ -115,8 +119,13 @@ export class Class_Project extends Scene {
     display(context, program_state) {
         if (program_state.animation_time > 120000)
             this.status = 1;
-        this.time_limit[0] = 1 - Math.floor(program_state.animation_time / 60000);
-        this.time_limit[1] = 59 - Math.floor((program_state.animation_time / 1000) % 60);
+        let sec = 59 - Math.floor((program_state.animation_time / 1000) % 60);
+        let min = 1 - Math.floor(program_state.animation_time / 60000)
+        this.time_limit[0] = min.toString();
+        if (sec < 10)
+            this.time_limit[1] = '0'+sec.toString();
+        else
+            this.time_limit[1] = sec.toString();
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
@@ -250,7 +259,7 @@ export class Class_Project extends Scene {
     //update transformation matrices of each active object 
         // game state
         let text = this.status == 1 ? "You  won!" : "You lost!";
-        let score_transform, text_transform, text_background_transform, text_transform2, time_transform, time_background_transform = null;
+        let score_transform, text_transform, text_background_transform, text_transform2, time_transform, lives_transform = null;
 
         if (this.status){
             score_transform = model_transform.times(Mat4.translation(-1,-1,0)).times(Mat4.scale(0.2, 0.2, 0.2));
@@ -259,10 +268,10 @@ export class Class_Project extends Scene {
         }
         else{
             text = "";
-            text_background_transform = model_transform.times(Mat4.translation(-6,3.9,-3)).times(Mat4.scale(2.3,0.6,0));
+            text_background_transform = model_transform.times(Mat4.translation(0,3.9,-3)).times(Mat4.scale(10,0.6,0));
             score_transform = model_transform.times(Mat4.translation(-5.4,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2));
             time_transform = model_transform.times(Mat4.translation(1.2,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2));
-            time_background_transform = model_transform.times(Mat4.translation(4.3, 4,-3)).times(Mat4.scale(3.9,0.8,0));
+            lives_transform = model_transform.times(Mat4.translation(-2.1,2.8,0)).times(Mat4.scale(0.2, 0.2, 0.2));
             text_transform = model_transform.times(Mat4.scale(0, 0, 0));
         }
 
@@ -271,35 +280,42 @@ export class Class_Project extends Scene {
         this.shapes.text.draw(context, program_state, score_transform, this.materials.text_image);
 
         if (!this.status){
-            this.shapes.cube.draw(context, program_state, time_background_transform, this.materials.text_background)
             this.shapes.text.set_string("Time limit " + this.time_limit[0] + ":" + this.time_limit[1], context.context);
             this.shapes.text.draw(context, program_state, time_transform, this.materials.text_image);
+            this.shapes.text.set_string("Lives: " + this.lives, context.context);
+            this.shapes.text.draw(context, program_state, lives_transform, this.materials.text_image);
         }
-
-        for (let i = 0; i<text.length; i++){
-            text_transform2 = text_transform.times(Mat4.translation(2.8*i,0,0)).times(Mat4.rotation(t*3,0,0,1));
-            switch (text[i]){
-                case 'Y':
-                    this.shapes.y.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 'o':
-                    this.shapes.o.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 'u':
-                    this.shapes.u.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 'l':
-                    this.shapes.l.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 's':
-                    this.shapes.s.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 't':
-                    this.shapes.t.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 'w':
-                    this.shapes.w.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case 'n':
-                    this.shapes.n.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
-                case '!':
-                    this.shapes.ex.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+        // else {
+        //     let cube_transform = model_transform.times(Mat4.scale(0.8,1.2,1.4)).times(Mat4.translation(-2,0,0));
+        //     let troj_transform = model_transform.times(Mat4.translation(3,0,0));
+        //     this.shapes.cube.draw(context, program_state, cube_transform, this.materials.letter_texture);
+        //     this.shapes.trojan.draw(context, program_state, troj_transform, this.materials.trojan_texture);
+        // }
+        else {
+            for (let i = 0; i<text.length; i++){
+                text_transform2 = text_transform.times(Mat4.translation(2.8*i,0,0)).times(Mat4.rotation(t*3,0,0,1));
+                switch (text[i]){
+                    case 'Y':
+                        this.shapes.y.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 'o':
+                        this.shapes.o.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 'u':
+                        this.shapes.u.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 'l':
+                        this.shapes.l.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 's':
+                        this.shapes.s.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 't':
+                        this.shapes.t.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 'w':
+                        this.shapes.w.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case 'n':
+                        this.shapes.n.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                    case '!':
+                        this.shapes.ex.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                }
             }
         }
-    
 }
 }
 
