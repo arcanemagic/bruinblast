@@ -6,7 +6,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 
-const {Phong_Shader} = defs
+const {Phong_Shader, Cube} = defs
 export class Game_Object{
     constructor(){
        
@@ -16,6 +16,7 @@ export class Game_Object{
         //this.projectile_transform: object's transformation matrix 
         //this.vx : object's horizontal velocity 
         //this.vy : object's vertical velocity 
+        //this.active : should the object be rendered or not 
 
         this.model_transform = Mat4.identity();
         this.spawn_locations = [[-3,-4,0], [-2,-4,0], [0, -4, 0], [0, -4, 0], [2,-4,0], [3,-4,0]];
@@ -23,10 +24,11 @@ export class Game_Object{
         
         this.types = ["bruin", "trojan", "bomb"]
 
-    
+        this.active = 1
         
         
         this.shapes = {
+            cube: new Cube(),
             bruin: new Shape_From_File("assets/bruin.obj"),
             trojan: new Shape_From_File("assets/trojan.obj"),
             bomb: new Shape_From_File("assets/bomb.obj")
@@ -77,8 +79,27 @@ export class Game_Object{
         let t2 = time - this.spawn_time 
 
         this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], this.spawn_location[2]))
-                                                        .times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0)).times(Mat4.scale(this.scale,this.scale,this.scale))
-        //add control for if trojan goes off screen without being slashed            
+                                                        .times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))
+
+                                            
+        //add control for if trojan goes off screen without being slashed    
+        
+        if (this.active && t2 > 3){
+            this.active = 0
+
+            //TODO: SOPHIA
+            if (this.type == "trojan"){
+                console.log("trojan fell off screen")
+                this.decrement_lives(scene)
+            }
+        }
+    }
+
+    decrement_lives(scene){
+        scene.lives-- 
+        if (scene.lives <= 0){
+            scene.status = 2
+        }
     }
 
     est_picking_color(color){
@@ -90,43 +111,39 @@ export class Game_Object{
 
     draw_picking(context, program_state){
         if (this.type == "bruin"){
-            this.shapes.bruin.draw(context, program_state, this.projectile_transform,
+            this.shapes.cube.draw(context, program_state, this.projectile_transform.times(Mat4.scale(0.9,0.9,0.9)),
                 this.materials.picking.override({color:this.picking_color})); 
         }
         else if (this.type == "trojan"){
-            this.shapes.trojan.draw(context, program_state, this.projectile_transform,
+            this.shapes.cube.draw(context, program_state, this.projectile_transform.times(Mat4.scale(0.8,1.2,1)),
             this.materials.picking.override({color:this.picking_color})); 
         }
         else {
-            this.shapes.bomb.draw(context, program_state, this.projectile_transform,
+            this.shapes.bomb.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale, this.scale, this.scale)),
             this.materials.picking.override({color:this.picking_color})); 
         }
     }
 
-    fake_draw(context, program_state){
-        //console.log("fake draw")
-        this.shapes.bruin.draw(context, program_state, this.model_transform.times(Mat4.translation(-2, 0, 0)), this.materials.bruin_texture)
-    }
+    
     draw_actual(context, program_state){
+
         if (this.type == "bruin"){
-            this.shapes.bruin.draw(context, program_state, this.projectile_transform,
+            this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
             this.materials.bruin_texture); 
         }
         else if (this.type == "trojan"){
-            this.shapes.trojan.draw(context, program_state, this.projectile_transform,
+            this.shapes.trojan.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
             this.materials.trojan_texture); 
         }
         else {
-            this.shapes.bomb.draw(context, program_state, this.projectile_transform,
+            this.shapes.bomb.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
             this.materials.bomb_texture); 
         }
     }
     interact(scene){ 
+        this.active = 0
         if (this.type == "bruin"){
-            scene.lives--
-            if (scene.lives <= 0){
-                scene.status = 2
-            }
+            this.decrement_lives(scene)
             console.log("BRUIN slashed")
         }
         else if (this.type == "trojan"){

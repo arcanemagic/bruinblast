@@ -78,12 +78,12 @@ export class Class_Project extends Scene {
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
         this.objects_deposit = []
-        for (let i = 0; i < 4; i++){
+        for (let i = 0; i < 5; i++){
             this.objects_deposit.push(new Game_Object())
         }
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
 
-       
+        this.wait = 3
      
         //this.objs.push(new Game_Object(0))
     }
@@ -152,9 +152,6 @@ export class Class_Project extends Scene {
                 this.width = rect.right - rect.left; 
                 this.height = rect.bottom - rect.top; 
                 
-                
-               
-
             })
             gl.canvas.addEventListener("mousedown", (e) => {
                 
@@ -162,7 +159,7 @@ export class Class_Project extends Scene {
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
-
+                console.log(`lives: ${this.lives}`)
             })
 
            
@@ -174,22 +171,21 @@ export class Class_Project extends Scene {
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
         //let spawns = [[-4,-4,0], [-3,-4,0], [2,-4,0], [4,-4,0]];
 
-        let index = Math.floor((t - 1)/5);
+        let index = Math.floor((t - 1)/this.wait);
 
             //spawn new object 
             //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
-        if (this.objs.length <= index && Math.floor(t)%5 == 0){
+        if (this.objs.length <= index && Math.floor(t)% this.wait == 0){
             this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
             (this.objs[this.objects_deposit_index]).setup(t)
-            this.objects_deposit_index++ 
-            this.objects_deposit_index = this.objects_deposit_index % 4
-            console.log(this.objects_deposit_index)          
+            this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 5
+            //console.log(this.objects_deposit_index)          
         }
 
 
         let object_id = 20 
         for (let i = 0; i < this.objs.length; i++, object_id++){
-            this.objs[i].update_state(t)
+            this.objs[i].update_state(t, this)
             this.objs[i].est_id(object_id)
             this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
         }
@@ -247,7 +243,7 @@ export class Class_Project extends Scene {
         this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
         /////////
 
-    //update transformation matrices of each active object 
+  
         // game state
         let text = this.status == 1 ? "You  won!" : "You lost!";
         let score_transform, text_transform, text_background_transform, text_transform2, time_transform, time_background_transform = null;
