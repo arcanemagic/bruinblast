@@ -16,31 +16,16 @@ export class Game_Object{
         //this.projectile_transform: object's transformation matrix 
         //this.vx : object's horizontal velocity 
         //this.vy : object's vertical velocity 
-        
+
         this.model_transform = Mat4.identity();
-        let spawn_locations = [[-3,-4,0], [-2,-4,0], [0, -4, 0], [0, -4, 0], [2,-4,0], [3,-4,0]];
-        let spawn_velocities =  [[1.5,8], [2.5,8],[-1.5,8], [-2.5,8]];
+        this.spawn_locations = [[-3,-4,0], [-2,-4,0], [0, -4, 0], [0, -4, 0], [2,-4,0], [3,-4,0]];
+        this.spawn_velocities =  [[1.5,8], [2.5,8],[-1.5,8], [-2.5,8]];
         
-        let types = ["bruin", "trojan", "bomb"]
+        this.types = ["bruin", "trojan", "bomb"]
 
     
         
-        this.spawn_location = spawn_locations[Math.floor(Math.random() * 6)];
-        this.spawn_velocity = spawn_velocities[Math.floor(Math.random() * 3)]
-        this.vx = this.spawn_velocity[0]
-        this.vy = this.spawn_velocity[1]
-
-        this.type = types[Math.floor(Math.random() * 3)] //which literal object we're going to draw 
         
-        if (this.type == "bruin"){
-            this.scale = .75 
-        }
-        else if (this.type == "trojan"){
-            this.scale = 1
-        }
-        else {
-            this.scale = .75
-        }
         this.shapes = {
             bruin: new Shape_From_File("assets/bruin.obj"),
             trojan: new Shape_From_File("assets/trojan.obj"),
@@ -66,9 +51,28 @@ export class Game_Object{
 
     }
 
-    set_spawn_time(time){
-        this.spawn_time = time 
+    setup(time){
+        this.spawn_time = time
+        this.spawn_location = this.spawn_locations[Math.floor(Math.random() * 6)];
+        this.spawn_velocity = this.spawn_velocities[Math.floor(Math.random() * 3)]
+        this.vx = this.spawn_velocity[0]
+        this.vy = this.spawn_velocity[1]
+
+        this.type = this.types[Math.floor(Math.random() * 3)] //which literal object we're going to draw 
+        
+        if (this.type == "bruin"){
+            this.scale = .75 
+        }
+        else if (this.type == "trojan"){
+            this.scale = 1
+        }
+        else {
+            this.scale = .75
+        }
+
     }
+
+    
     update_state(time, scene = 0){
         let t2 = time - this.spawn_time 
 

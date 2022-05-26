@@ -67,7 +67,7 @@ export class Class_Project extends Scene {
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
         this.objects_deposit = []
-        for (let i = 0; i < 50; i++){
+        for (let i = 0; i < 3; i++){
             this.objects_deposit.push(new Game_Object())
         }
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
@@ -159,8 +159,9 @@ export class Class_Project extends Scene {
             //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
         if (this.objs.length <= index && Math.floor(t)%5 == 0){
             this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
-            (this.objs[this.objects_deposit_index]).set_spawn_time(t)
+            (this.objs[this.objects_deposit_index]).setup(t)
             this.objects_deposit_index++ 
+            this.objects_deposit_index = this.objects_deposit_index % 3
             console.log(this.objects_deposit_index)          
         }
 
