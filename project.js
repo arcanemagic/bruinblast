@@ -132,6 +132,7 @@ export class Class_Project extends Scene {
             })
             gl.canvas.addEventListener("mousedown", (e) => {
                 
+                console.log("mouse clicked")
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
@@ -166,7 +167,7 @@ export class Class_Project extends Scene {
         this.objs[i].draw_picking(context, program_state)
        }
        
-
+       /////// IGNORE THIS: Mouse picking implementation 
        if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
         this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
         this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
@@ -192,6 +193,8 @@ export class Class_Project extends Scene {
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+
+        //what to do if the object gets clicked-- see interact() function in object.js
         for (let i = 0; i < this.objs.length; i++){
             if (selected_model_id == this.objs[i].id){
                 this.objs[i].interact()
@@ -200,6 +203,9 @@ export class Class_Project extends Scene {
             }
         }
         
+        //////// END OF MOUSE PICKING IMPLEMENTATION 
+
+
 
         for (let i = 0; i < this.objs.length; i++){
             this.objs[i].draw_actual(context, program_state)
