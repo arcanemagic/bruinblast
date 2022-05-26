@@ -104,9 +104,9 @@ export class Game_Object{
             if (this.active && (y < -4 || x < -6 || x > 6)){
                 this.active = 0
     
+                console.log(`${this.type} fell off screen`)
                 //TODO: SOPHIA
                 if (this.type == "trojan"){
-                    console.log("trojan fell off screen")
                     this.decrement_lives(scene)
                 }
             }
@@ -147,7 +147,7 @@ export class Game_Object{
         draw_actual(context, program_state){
     
             if (this.type == "bruin"){
-                if (true){
+                if (!this.slashed){
                     this.shapes.bruin.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
                     this.materials.bruin_texture); 
                     this.projectile_transform1 = this.projectile_transform;
@@ -165,7 +165,7 @@ export class Game_Object{
     
             }
             else if (this.type == "trojan"){
-                if (true){
+                if (!this.slashed){
                     this.shapes.trojan.draw(context, program_state, this.projectile_transform.times(Mat4.scale(this.scale,this.scale,this.scale)),
                     this.materials.trojan_texture); 
                     this.projectile_transform1 = this.projectile_transform;
