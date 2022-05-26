@@ -163,8 +163,8 @@ export class Class_Project extends Scene {
                 
             })
             gl.canvas.addEventListener("mousedown", (e) => {
-                
                 console.log("mouse clicked")
+                console.log(this.objs[this.objs.length-1].spawn_location)
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
@@ -180,34 +180,41 @@ export class Class_Project extends Scene {
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
         //let spawns = [[-4,-4,0], [-3,-4,0], [2,-4,0], [4,-4,0]];
 
-        let index = Math.floor((t - 1)/this.wait);
+            let index = Math.floor((t - 1)/this.wait);
 
-            //spawn new object 
-            //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
-        if (this.objs.length <= index && Math.floor(t)% this.wait == 0){
-            this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
-            (this.objs[this.objects_deposit_index]).setup(t)
-            this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 5
-            //console.log(this.objects_deposit_index)          
-        }
+                //spawn new object 
+                //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
+
+            //some scratch thought: objects that get launched first should be the first to become inactive 
+            //pick this.objects_deposit_index wisely based on which object is inactive 
+            if (this.objs.length <= index && Math.floor(t)% this.wait == 0){
+
+                while (this.objects_deposit[this.objects_deposit_index].active == 1){
+                    this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 5
+                }
+                this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
+                (this.objs[this.objects_deposit_index]).setup(t)
+                this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 5
+                //console.log(this.objects_deposit_index)          
+            }
 
 
-        let object_id = 20 
-       // let temp_objs = []
-        for (let i = 0; i < this.objs.length; i++, object_id++){
-            this.objs[i].update_state(t, this)
-            this.objs[i].est_id(object_id)
-            this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
-        }
-        for (let i = 0; i < this.objs.length; i++){
-            this.objs[i].draw_picking(context, program_state)
-        }
-        
-        /////// IGNORE THIS: Mouse picking implementation 
-        if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
-            this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
-            this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
-        }
+            let object_id = 20 
+            // let temp_objs = []
+            for (let i = 0; i < this.objs.length; i++, object_id++){
+                this.objs[i].update_state(t, this)
+                this.objs[i].est_id(object_id)
+                this.objs[i].est_picking_color(this.make_picking_color(object_id)) 
+            }
+            for (let i = 0; i < this.objs.length; i++){
+                this.objs[i].draw_picking(context, program_state)
+            }
+            
+            /////// IGNORE THIS: Mouse picking implementation 
+            if (this.start_mouseX >= 0 && this.start_mouseY >= 0 && this.end_mouseX >= 0 && this.end_mouseY >= 0){
+                this.mouseX = (this.start_mouseX + this.end_mouseX) / 2
+                this.mouseY = (this.start_mouseY + this.end_mouseY) / 2
+            }
 
             const pixelX = this.mouseX * gl.canvas.width / gl.canvas.clientWidth;
             const pixelY = gl.canvas.height - this.mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
@@ -299,7 +306,8 @@ export class Class_Project extends Scene {
                     case 'u':
                         this.shapes.u.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 'l':
-                        this.shapes.l.draw(context, program_state, text_transform2.times(Mat4.scale(1.5,1.5,1)), this.materials.letter_texture); break;
+                        text_transform2 = text_transform2.times(Mat4.scale(1.3,1,1.5));
+                        this.shapes.l.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 's':
                         this.shapes.s.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 't':
