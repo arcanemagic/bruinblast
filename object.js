@@ -62,7 +62,7 @@ export class Game_Object{
         this.vx = this.spawn_velocity[0];
         this.vy = this.spawn_velocity[1];
         if (this.vy == 0)
-            this.gravity = 1.05;
+            this.gravity = 2.1;
         else
             this.gravity = 3.9;
         
@@ -89,7 +89,8 @@ export class Game_Object{
                                             
         //add control for if trojan goes off screen without being slashed    
         
-        if (this.active && t2 > 3){
+        let y = (this.projectile_transform.times(vec4(0,0,0,1)))[1]
+        if (this.active && y < -4){
             this.active = 0
 
             //TODO: SOPHIA

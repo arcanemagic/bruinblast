@@ -193,7 +193,7 @@ export class Class_Project extends Scene {
 
 
         let object_id = 20 
-        let temp_objs = []
+       // let temp_objs = []
         for (let i = 0; i < this.objs.length; i++, object_id++){
             this.objs[i].update_state(t, this)
             this.objs[i].est_id(object_id)
@@ -253,7 +253,7 @@ export class Class_Project extends Scene {
         this.shapes.cube.draw(context, program_state, sky_model_transform, this.materials.sky_texture)
         /////////
 
-  
+       
         // game state
         let text = this.status == 1 ? "You  won!" : "You lost!";
         let score_transform, text_transform, text_background_transform, text_transform2, time_transform, lives_transform = null;
@@ -299,7 +299,7 @@ export class Class_Project extends Scene {
                     case 'u':
                         this.shapes.u.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 'l':
-                        this.shapes.l.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
+                        this.shapes.l.draw(context, program_state, text_transform2.times(Mat4.scale(1.5,1.5,1)), this.materials.letter_texture); break;
                     case 's':
                         this.shapes.s.draw(context, program_state, text_transform2, this.materials.letter_texture); break;
                     case 't':
