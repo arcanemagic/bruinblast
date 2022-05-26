@@ -72,13 +72,13 @@ export class Class_Project extends Scene {
         this.objs = [];
         this.score = 0; 
 
-        // initial velocities
+       
         this.time_limit = [0,0];
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
         this.objects_deposit = []
-        for (let i = 0; i < 3; i++){
+        for (let i = 0; i < 4; i++){
             this.objects_deposit.push(new Game_Object())
         }
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
@@ -182,7 +182,7 @@ export class Class_Project extends Scene {
             this.objs.push(this.objects_deposit[this.objects_deposit_index]);  
             (this.objs[this.objects_deposit_index]).setup(t)
             this.objects_deposit_index++ 
-            this.objects_deposit_index = this.objects_deposit_index % 3
+            this.objects_deposit_index = this.objects_deposit_index % 4
             console.log(this.objects_deposit_index)          
         }
 
@@ -227,7 +227,7 @@ export class Class_Project extends Scene {
             //what to do if the object gets clicked-- see interact() function in object.js
             for (let i = 0; i < this.objs.length; i++){
                 if (selected_model_id == this.objs[i].id){
-                    this.objs[i].interact()
+                    this.objs[i].interact(this)
                     selected_model_id = -1 
                     break
                 }

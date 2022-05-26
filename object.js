@@ -121,15 +121,21 @@ export class Game_Object{
             this.materials.bomb_texture); 
         }
     }
-    interact(){ 
+    interact(scene){ 
         if (this.type == "bruin"){
+            scene.lives--
+            if (scene.lives <= 0){
+                scene.status = 2
+            }
             console.log("BRUIN slashed")
         }
         else if (this.type == "trojan"){
+            scene.score++ 
             console.log("TROJAN slashed")
         }
         else {
             console.log("BOMB slashed")
+            scene.status = 2 
         }
     }
     // affect_lives(lives){
