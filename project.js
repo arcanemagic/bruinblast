@@ -15,11 +15,14 @@ export class Class_Project extends Scene {
         super();
         this.shapes = {
             cube: new Cube(),
-            sphere: new Subdivision_Sphere(4), 
-            teapot: new Shape_From_File("assets/teapot.obj"),
             text: new Text_Line(35),
             bruin: new Shape_From_File("assets/bruin.obj"),
             trojan: new Shape_From_File("assets/trojan.obj"),
+            bomb: new Shape_From_File("assets/bomb.obj"),
+            bruin1: new Shape_From_File("assets/bear-half-2.obj"),
+            bruin2: new Shape_From_File("assets/bear-half.obj"),
+            trojan1: new Shape_From_File("assets/trojan-half-2.obj"),
+            trojan2: new Shape_From_File("assets/trojan-half-2.obj"), 
             y: new Shape_From_File("assets/Y.obj"),
             o: new Shape_From_File("assets/o.obj"),
             u: new Shape_From_File("assets/u.obj"),
@@ -42,14 +45,7 @@ export class Class_Project extends Scene {
                 texture: new Texture("assets/sky.png", "LINEAR_MIPMAP_LINEAR")
             }),
 
-            bruin_texture: new Material(new Phong_Shader(), {
-                color: color(0, 1, 1, 1), 
-                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
-            }),
-            trojan_texture: new Material(new Phong_Shader(), {
-                color: color(1, 0, 0, 1), 
-                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
-            }), 
+            
             text_background: new Material(new Phong_Shader(), {
                 color: hex_color("000000"), 
                 ambient: 1, diffusivity: 0, specularity: 0,
@@ -61,7 +57,24 @@ export class Class_Project extends Scene {
             letter_texture: new Material(new Phong_Shader(),{
                 color: color(0.9,0,0,1),
                 ambient:0.3, diffusivity: 1, specularity:0.5
+            }),
+
+            bruin_texture: new Material(new Phong_Shader(), {
+                color: color(0, 0, 1, 1), 
+                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
+            }),
+            trojan_texture: new Material(new Phong_Shader(), {
+                color: color(1, 0, 0, 1), 
+                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
+            }), 
+            bomb_texture: new Material(new Phong_Shader(), {
+                color: color(1, 0, 0, 1), 
+                ambient: 0.5, diffusivity: 0.5, specularity: 0.5
+            }), 
+            picking: new Material(new Uniform_Shader(), {
+                color: color(0,0,0,1)
             })
+            
         }
 
         this.start_mouseX = -1;
@@ -82,9 +95,9 @@ export class Class_Project extends Scene {
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
         this.objects_deposit = []
-        this.objects_deposit_capacity = 6
+        this.objects_deposit_capacity = 4
         for (let i = 0; i < this.objects_deposit_capacity; i++){
-            this.objects_deposit.push(new Game_Object())
+            this.objects_deposit.push(new Game_Object(this.shapes, this.materials))
         }
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
 
@@ -203,13 +216,15 @@ export class Class_Project extends Scene {
 
 
             let object_id = 20 
+
+            /*
             let temp_objs = []
             for (let i = 0; i < this.objs.length; i++){
                 if (this.objs[i].active){
                     temp_objs.push(this.objs[i])
                 }
-            }
-            this.objs = temp_objs
+            }*/
+            //this.objs = temp_objs
             for (let i = 0; i < this.objs.length; i++, object_id++){
                 this.objs[i].update_state(t, this)
                 this.objs[i].est_id(object_id)
