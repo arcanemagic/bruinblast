@@ -82,13 +82,14 @@ export class Class_Project extends Scene {
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
         this.objects_deposit = []
-        for (let i = 0; i < 10; i++){
+        this.objects_deposit_capacity = 6
+        for (let i = 0; i < this.objects_deposit_capacity; i++){
             this.objects_deposit.push(new Game_Object())
         }
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
 
         this.overall_objs_generated = 0 
-        this.wait = 3
+        this.wait = 2
      
         //this.objs.push(new Game_Object(0))
     }
@@ -169,7 +170,7 @@ export class Class_Project extends Scene {
                 this.start_mouseX = e.clientX - this.rect_left; 
                 this.start_mouseY = e.clientY - this.rect_top; 
 
-                console.log(`lives: ${this.lives}`)
+                //console.log(`lives: ${this.lives}`)
             })
 
            
@@ -181,7 +182,7 @@ export class Class_Project extends Scene {
         // this.shapes.box_1.draw(context, program_state, cube_1_transform, this.materials.texture1); 
         //let spawns = [[-4,-4,0], [-3,-4,0], [2,-4,0], [4,-4,0]];
 
-            let index = Math.floor((t - 1)/this.wait);
+            let index = Math.floor((t - 2)/this.wait);
 
                 //spawn new object 
                 //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
@@ -191,12 +192,12 @@ export class Class_Project extends Scene {
             if (this.overall_objs_generated <= index && Math.floor(t)% this.wait == 0){
 
                 while (this.objects_deposit[this.objects_deposit_index].active == 1){
-                    this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 10
+                    this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % this.objects_deposit_capacity
                 }
                 this.objs.push(this.objects_deposit[this.objects_deposit_index]); 
                 this.overall_objs_generated++ 
                 (this.objs[this.objs.length - 1]).setup(t)
-                this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % 10
+                this.objects_deposit_index = (this.objects_deposit_index  + 1 ) % this.objects_deposit_capacity
                 //console.log(this.objects_deposit_index)          
             }
 
