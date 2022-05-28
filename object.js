@@ -110,9 +110,9 @@ export class Game_Object{
                 //TODO: SOPHIA
 
                 // UNCOMMENT: SOPHIA
-                // if (this.type == "trojan"){
-                //     this.decrement_lives(scene)
-                // }
+                if (this.type == "trojan"){
+                    this.decrement_lives(scene)
+                }
             }
         }
     

@@ -102,7 +102,7 @@ export class Class_Project extends Scene {
         this.objects_deposit_index = 0 //increment this every time you spawn a new object in display() 
 
         this.overall_objs_generated = 0 
-        this.wait = 2
+        this.wait = 1
      
         //this.objs.push(new Game_Object(0))
     }
@@ -119,6 +119,9 @@ export class Class_Project extends Scene {
             this.status = 0; 
             window.location.reload()
         });
+
+        
+        
        
     }
     
@@ -225,6 +228,8 @@ export class Class_Project extends Scene {
                 }
             }*/
             //this.objs = temp_objs
+
+
             for (let i = 0; i < this.objs.length; i++, object_id++){
                 this.objs[i].update_state(t, this)
                 this.objs[i].est_id(object_id)
