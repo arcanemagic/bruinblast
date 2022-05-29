@@ -92,7 +92,7 @@ export class Game_Object{
         
         update_state(time, scene = 0){
             let t2 = time - this.spawn_time 
-    
+            
             this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], 0))
                                                             .times(Mat4.translation(this.vx*t2, this.vy*t2-this.gravity*t2**2, 0))
             /*.times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))*/
@@ -102,8 +102,10 @@ export class Game_Object{
             let point = (this.projectile_transform.times(vec4(0,0,0,1)))
             let x = point[0]
             let y = point[1]
-            
-            if (this.active && (y < -4 || x < -6 || x > 6)){
+            if (this.active == 2 && time - this.slash_time >= 1){
+                this.active = 0; 
+            }
+            if (this.active == 1 && (y < -4 || x < -6 || x > 6)){
                 this.active = 0
     
                 console.log(`${this.type} fell off screen`)
@@ -191,10 +193,11 @@ export class Game_Object{
                 this.materials.bomb_texture); 
             }
         }
-        interact(scene){ 
-            this.active = 0
+        interact(scene, time){ 
+            this.active = 2
+            this.slash_time = time 
             if (this.type == "bruin"){
-                this.decrement_lives(scene)
+                this.decrement_lives(scene) //TODO: SOPHIA
                 this.slashed = true
                 console.log("BRUIN slashed")
             }

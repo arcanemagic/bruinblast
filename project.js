@@ -220,14 +220,14 @@ export class Class_Project extends Scene {
 
             let object_id = 20 
 
-            /*
+            
             let temp_objs = []
             for (let i = 0; i < this.objs.length; i++){
                 if (this.objs[i].active){
                     temp_objs.push(this.objs[i])
                 }
-            }*/
-            //this.objs = temp_objs
+            }
+            this.objs = temp_objs
 
 
             for (let i = 0; i < this.objs.length; i++, object_id++){
@@ -268,8 +268,8 @@ export class Class_Project extends Scene {
 
             //what to do if the object gets clicked-- see interact() function in object.js
             for (let i = 0; i < this.objs.length; i++){
-                if (selected_model_id == this.objs[i].id){
-                    this.objs[i].interact(this)
+                if (selected_model_id == this.objs[i].id && this.objs[i].active == 1){
+                    this.objs[i].interact(this, t)
                     selected_model_id = -1 
                     break
                 }
