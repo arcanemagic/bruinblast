@@ -23,7 +23,7 @@ We chose to do bounding boxes instead of just drawing the exact same object shap
 In order to draw the bounding boxes with a particular color, we made our own stripped down shader. It is adapted from the Phong Shader and does not consider the effects of lighting. 
 
 #### Physics 
-All objects follow a parabolic path based on gravity. We used kinematic equations to translate the object to the appropriate location and kept track of "air time" of the object by comparing current program time against the spawn time of the object. 
+All objects follow a parabolic path based on gravity. We kept track of "air time" of the object by comparing current program time against the spawn time of the object and then used that air time, gravitational acceleration, and kinematics equations to translate the object to the appropriate location. 
 
 #### Contributions
 1. Sophia Adrangi implemented mouse picking, the algorithm for object recycling, and the object class. She also helped debug the "object-splits-apart-when-clicked" animation. 
