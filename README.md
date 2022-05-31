@@ -25,7 +25,17 @@ In order to draw the bounding boxes with a particular color, we made our own str
 #### Physics 
 All objects follow a parabolic path based on gravity. We kept track of "air time" of the object by comparing current program time against the spawn time of the object and then used that air time, gravitational acceleration, and kinematics equations to translate the object to the appropriate location. 
 
-#### Contributions
+
+### Class Principles Used 
+1. Texturing (sky is a scrolling texture) 
+2. Transformations 
+3. Modeling and Rendering 
+4. Particle Parameters and Simulation 
+5. Shaders 
+6. Asynchronous Programming 
+
+
+### Contributions
 1. Sophia Adrangi implemented mouse picking, the algorithm for object recycling, and the object class. She also helped debug the "object-splits-apart-when-clicked" animation. 
 2. Siyu Chen implemented physics, the spawn-time algorithm, the timer, the win/lose screens, and helped implement the splitting apart of objects when they're clicked. 
 3. Dhruv Jain made all of the models and helped implement the splitting apart of objects when they're clicked. 
