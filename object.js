@@ -23,9 +23,7 @@ export class Game_Object{
             //this.active : should the object be rendered or not 
     
             this.model_transform = Mat4.identity();
-           // this.spawn_locations = [[-6,1.2,0], [-5,-4,0], [-3,-4,0], [1, -4, 0], [1, -4, 0], [3,-4,0], [5,-4,0], [6,1.2,0]];
-            //this.spawn_velocities =  [[0,4], [3.2,8], [2.7,8.5], [2,8.5], [-2,8.5], [-2.7,8.5],[-3.2,8], [2.7,8.5]];
-
+      
                                 //arranged as spawn location, spawn velocity 
             this.spawn_pairs = [[[-6,1.2,0], [3.5, 0]], //spawn on left up side 1
                                 [[-6,1.2,0], [ 5, 0]],   //2
@@ -40,7 +38,7 @@ export class Game_Object{
                                 [[-3, -4, 0], [2.7, 8.5]],//11
                                 [[-3, -4, 0], [2.3, 8]],//12
                                 [[1, -4, 0], [0, 7]],//13
-                                [ [1, -4, 0], [-1, 8]], //14
+                                [[1, -4, 0], [-1, 8]], //14
                                 [[0, -4, 0], [0, 7]],//15
                                 [[3, -4, 0], [-2, 8.5]],//16
                                 [[3, -4, 0], [-2.7, 8]],//17
@@ -95,7 +93,6 @@ export class Game_Object{
             
             this.projectile_transform = this.model_transform.times(Mat4.translation(this.spawn_location[0], this.spawn_location[1], 0))
                                                             .times(Mat4.translation(this.vx*t2, this.vy*t2-this.gravity*t2**2, 0))
-            /*.times(Mat4.translation(this.vx*t2, this.vy*t2-3.9*t2**2, 0))*/
     
                                                 
             //add control for if trojan goes off screen without being slashed    
@@ -109,7 +106,7 @@ export class Game_Object{
                 this.active = 0
     
                 console.log(`${this.type} fell off screen`)
-                //TODO: SOPHIA
+             
 
                 // UNCOMMENT: SOPHIA
                 if (this.type == "trojan"){
@@ -122,9 +119,7 @@ export class Game_Object{
             scene.lives-- 
             if (scene.lives <= 0){
                 scene.status = 2
-            }
-                                                          
-            //add control for if trojan goes off screen without being slashed            
+            }                                          
         }
     
         est_picking_color(color){
@@ -161,7 +156,6 @@ export class Game_Object{
                     this.projectile_transform2 = this.projectile_transform;
                 }
                 else {
-                    //let t2 = program_state.animation_time - this.spawn_time
                     this.projectile_transform1 = this.projectile_transform1.times(Mat4.translation(0.2,-0.1, 0))
                     this.projectile_transform2 = this.projectile_transform2.times(Mat4.translation(-0.2,0.1, 0))
                     this.shapes.bruin1.draw(context, program_state, this.projectile_transform1.times(Mat4.scale(this.scale,this.scale,this.scale)),
@@ -179,7 +173,6 @@ export class Game_Object{
                     this.projectile_transform2 = this.projectile_transform;
                 }
                 else {
-                    //let t2 = program_state.animation_time - this.spawn_time
                     this.projectile_transform1 = this.projectile_transform1.times(Mat4.translation(0.5,-0.1, 0))
                     this.projectile_transform2 = this.projectile_transform2.times(Mat4.translation(-0.5,0.1, 0))
                     this.shapes.trojan1.draw(context, program_state, this.projectile_transform1.times(Mat4.scale(this.scale,this.scale,this.scale)),
@@ -195,15 +188,14 @@ export class Game_Object{
         }
         interact(scene, time){ 
             this.active = 2
+            this.slashed = true 
             this.slash_time = time 
             if (this.type == "bruin"){
-                this.decrement_lives(scene) //TODO: SOPHIA
-                this.slashed = true
+                this.decrement_lives(scene) 
                 console.log("BRUIN slashed")
             }
             else if (this.type == "trojan"){
                 scene.score++ 
-                this.slashed = true
                 console.log("TROJAN slashed")
             }
             else {

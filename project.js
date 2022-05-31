@@ -84,7 +84,7 @@ export class Class_Project extends Scene {
         this.mouseX = -1 
         this.mouseY = -1 
         this.initialized = false;
-        this.lives = 3 
+        this.lives = 5
 
         this.objs = [];
         this.score = 0; 
@@ -200,9 +200,7 @@ export class Class_Project extends Scene {
 
             let index = Math.floor((t - 2)/this.wait);
 
-                //spawn new object 
-                //TODO : SOPHIA / SIYU : need to find another way to keep track of elapsed time without checking objects length 
-
+               
             //some scratch thought: objects that get launched first should be the first to become inactive 
             //pick this.objects_deposit_index wisely based on which object is inactive 
             if (this.overall_objs_generated <= index && Math.floor(t)% this.wait == 0){
