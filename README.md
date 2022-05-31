@@ -1,4 +1,4 @@
- CS174A Mouse Picking Group Project
+Bruin Blast-- CS174A Final Project 
 
 ### Team member names and UIDs
 1. Sophia Adrangi 405484745 sophiaadrangi@gmail.com
