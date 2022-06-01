@@ -109,10 +109,10 @@ export class Class_Project extends Scene {
 
     make_control_panel() {
         
-        this.key_triggered_button("won", ["c"], () => {
+        this.key_triggered_button("won", ["a"], () => {
             this.status = 1; 
         });
-        this.key_triggered_button("lost", ["c"], () => {
+        this.key_triggered_button("lost", ["b"], () => {
             this.status = 2; 
         });
         this.key_triggered_button("normal", ["c"], () => {
