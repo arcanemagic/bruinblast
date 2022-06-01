@@ -6,7 +6,19 @@ Bruin Blast-- CS174A Final Project
 3. Dhruv Jain 505531435 dhruvjain@g.ucla.edu
 
 ### Overview
-This project is inspired by Fruit Ninja. The game lasts 2 minutes. At regular intervals, 1 of 3 objects--a bruin bear, a trojan helmet, or a bomb--will spawn in the game. The player's goal is either to click or slash (by holding down the mouse) through the trojan helmets to gain points while avoiding the bruin bears and bomb. If the player fails to destroy a trojan helmet before it falls off screen (all objects are influenced by gravity) the player will lose a life. If the player slashes/clicks a bruin bear he will also lose a life. If the player slashes/clicks a bomb he loses instantly. The game ends either when the player has lost all lives, clicked a bomb, or the 2 minutes are up. 
+This project is inspired by Fruit Ninja. The game lasts 2 minutes. At regular intervals, 1 of 3 objects--a bruin bear, a trojan helmet, or a bomb--will spawn in the game. The player's goal is either to click or slash (by holding down the mouse) through the trojan helmets to gain points while avoiding the bruin bears and bomb. 
+1. If the player fails to destroy a trojan helmet before it falls off screen (all objects are influenced by gravity) the player will lose a life. 
+2. If the player clicks/slashes a trojan helmet, the player gets a point. 
+3. If the player slashes/clicks a bruin bear he will also lose a life. 
+4. If the player slashes/clicks a bomb he loses instantly. 
+5. The game ends either when the player has lost all lives, clicked a bomb, or the 2 minutes are up. 
+6. Player can start a new game by pressing c 
+
+**A FEW NOTES FOR PLAYERS** 
+1. Actually slashing the objects is difficult, as you have to ensure that your mouse is held down the whole time and that your mouse doesn't go off screen. If you're struggling to slash, you can just click the objects. 
+2. **IMPORTANT** A new object renders every second. If you want to leave the screen to go to a different page, please pause the game by either pressing "a" or "b". When you come back to the screen, you can press "c" to start a new game. 
+3. If you don't press "a" or "b" before leaving the screen, and then come back, your brower will render all the objects that were supposed to render in the time you were away, and the game will crash.  
+
 
 ### Design and Implementation
 1. As our models are very detailed and quite expensive to load in, the program starts by making an "object deposit" in the constructor. Though the game looks like it can hypothetically have infinite objects, there are truly only 4 objects actually constructed. We maintain the illusion of infinite objects by simply recycling objects that are inactive--i.e. they've either been destroyed by the player or have fallen off screen. 
