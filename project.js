@@ -109,13 +109,13 @@ export class Class_Project extends Scene {
 
     make_control_panel() {
         
-        this.key_triggered_button("won", ["a"], () => {
+        this.key_triggered_button("Pause (win screen)", ["a"], () => {
             this.status = 1; 
         });
-        this.key_triggered_button("lost", ["b"], () => {
+        this.key_triggered_button("Pause (lose screen)", ["b"], () => {
             this.status = 2; 
         });
-        this.key_triggered_button("normal", ["c"], () => {
+        this.key_triggered_button("Restart game", ["c"], () => {
             this.status = 0; 
             window.location.reload()
         });
